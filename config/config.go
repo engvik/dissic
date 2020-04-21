@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"flag"
+	"fmt"
+	"strings"
 )
 
 type Config struct {
@@ -10,31 +12,23 @@ type Config struct {
 }
 
 type Reddit struct {
-	ClientID     string
-	ClientSecret string
-	Username     string
-	Password     string
+	Username string
+	Subs     []string
 }
 
 func Parse() (*Config, error) {
-	var redditClientID string
-	var redditClientSecret string
 	var redditUsername string
-	var redditPassword string
+	var redditSubs string
 
-	flag.StringVar(&redditClientID, "reddit-client-id", "", "Reddit client ID")
-	flag.StringVar(&redditClientSecret, "reddit-client-secret", "", "Reddit client secret")
 	flag.StringVar(&redditUsername, "reddit-username", "", "Reddit username")
-	flag.StringVar(&redditPassword, "reddit-password", "", "Reddit password")
+	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
 
 	flag.Parse()
 
 	cfg := Config{
 		Reddit: Reddit{
-			ClientID:     redditClientID,
-			ClientSecret: redditClientSecret,
-			Username:     redditUsername,
-			Password:     redditPassword,
+			Username: redditUsername,
+			Subs:     strings.Split(redditSubs, ","),
 		},
 	}
 
@@ -46,21 +40,17 @@ func Parse() (*Config, error) {
 	return &cfg, nil
 }
 
+func (c *Config) GetRedditUserAgent() string {
+	return fmt.Sprintf("graw:reddify:0.0.1 by /u/%s", c.Reddit.Username)
+}
+
 func (c *Config) validate() error {
-	if c.Reddit.ClientID == "" {
-		return errors.New("Reddit client ID is missing (--reddit-client-id)")
-	}
-
-	if c.Reddit.ClientSecret == "" {
-		return errors.New("Reddit client secret is missing (--reddit-client-secret)")
-	}
-
 	if c.Reddit.Username == "" {
 		return errors.New("Reddit username is missing (--reddit-username)")
 	}
 
-	if c.Reddit.Password == "" {
-		return errors.New("Reddit password is missing (--reddit-password)")
+	if len(c.Reddit.Subs) <= 0 {
+		return errors.New("no subreddits passed (--subreddits=a,b,c)")
 	}
 
 	return nil

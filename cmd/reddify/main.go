@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/engvik/reddify/config"
+	"github.com/engvik/reddify/reddit"
 )
 
 func main() {
@@ -20,6 +20,12 @@ func main() {
 		log.Fatalf("error parsing config: %s", err.Error())
 	}
 
-	fmt.Println("reddify - reddit to spotify playlist")
-	fmt.Println(cfg)
+	redditClient, err := reddit.New(cfg)
+	if err != nil {
+		log.Fatalf("error creating reddit client: %s", err.Error())
+	}
+
+	if err := redditClient.Listen(); err != nil {
+		log.Fatalf("reddit listen error: %s", err.Error())
+	}
 }
