@@ -34,7 +34,7 @@ func New(cfg *config.Config) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) AuthHandler() http.HandlerFunc {
+func (c *Client) AuthHandler(authenticated chan bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := c.Auth.Token(c.Session, r)
 		if err != nil {
@@ -43,5 +43,6 @@ func (c *Client) AuthHandler() http.HandlerFunc {
 		}
 
 		c.C = c.Auth.NewClient(token)
+		authenticated <- true
 	}
 }

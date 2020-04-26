@@ -30,8 +30,16 @@ func main() {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
-	http.HandleFunc("/spotifyAuth", spotifyClient.AuthHandler())
-	go http.ListenAndServe(":1337", nil)
+	spotGotAuth := make(chan bool)
+
+	http.HandleFunc("/spotifyAuth", spotifyClient.AuthHandler(spotGotAuth))
+	go func() {
+		if err := http.ListenAndServe(":1337", nil); err != nil {
+			log.Fatalf("error starting http server: %s", err.Error())
+		}
+	}()
+
+	<-spotGotAuth
 
 	if err := redditClient.Listen(); err != nil {
 		log.Fatalf("reddit listen error: %s", err.Error())
