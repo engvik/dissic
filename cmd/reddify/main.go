@@ -41,6 +41,10 @@ func main() {
 
 	<-spotGotAuth
 
+	if err := spotifyClient.PreparePlaylist(cfg.Spotify.Playlist); err != nil {
+		log.Fatalf("error preparing playlist: %s", err.Error())
+	}
+
 	if err := redditClient.Listen(); err != nil {
 		log.Fatalf("reddit listen error: %s", err.Error())
 	}
