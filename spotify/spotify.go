@@ -26,6 +26,7 @@ type Client struct {
 	MusicChan MusicChan
 	Playlist  *spotify.FullPlaylist
 	C         spotify.Client
+	Verbose   bool
 }
 
 const ErrInvalidID = "Invalid playlist Id"
@@ -37,6 +38,7 @@ func New(cfg *config.Config) (*Client, error) {
 		Auth:      auth,
 		Session:   "asdasdff", // TODO: Generate
 		MusicChan: make(chan Music),
+		Verbose:   cfg.Verbose,
 	}
 
 	c.Auth.SetAuthInfo(cfg.Spotify.ClientID, cfg.Spotify.ClientSecret)
@@ -45,6 +47,8 @@ func New(cfg *config.Config) (*Client, error) {
 	if err := browser.OpenURL(c.AuthURL); err != nil {
 		return nil, fmt.Errorf("error opening url: %w", err)
 	}
+
+	c.Log("Spotify client set up")
 
 	return &c, nil
 }
@@ -69,6 +73,8 @@ func (c *Client) PreparePlaylist(name string) error {
 		return fmt.Errorf("error getting current user: %w", err)
 	}
 
+	c.Log(fmt.Sprintf("Retrived Spotify user: %s", user.ID))
+
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
 		return fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
@@ -83,6 +89,8 @@ func (c *Client) PreparePlaylist(name string) error {
 				return fmt.Errorf("error getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
 
+			c.Log(fmt.Sprintf("Found Spotify playlist: %s (%s)", p.Name, p.ID))
+
 			break
 		}
 	}
@@ -92,6 +100,8 @@ func (c *Client) PreparePlaylist(name string) error {
 		if err != nil {
 			return fmt.Errorf("error creating playlist %s: %w", name, err)
 		}
+
+		c.Log(fmt.Sprintf("Created Spotify playlist: %s", name))
 	}
 
 	c.Playlist = playlist
@@ -103,7 +113,13 @@ func (c *Client) Listen() {
 	for {
 		select {
 		case m := <-c.MusicChan:
-			log.Println(m)
+			log.Println("***", m)
 		}
+	}
+}
+
+func (c *Client) Log(s string) {
+	if c.Verbose {
+		log.Println(s)
 	}
 }
