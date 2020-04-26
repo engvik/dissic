@@ -20,6 +20,7 @@ type Reddit struct {
 type Spotify struct {
 	ClientID     string
 	ClientSecret string
+	Playlist     string
 }
 
 func Parse() (*Config, error) {
@@ -27,11 +28,13 @@ func Parse() (*Config, error) {
 	var redditSubs string
 	var spotifyClientID string
 	var spotifyClientSecret string
+	var spotifyPlaylist string
 
 	flag.StringVar(&redditUsername, "reddit-username", "", "Reddit username")
 	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
 	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "Spotify client ID")
 	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "Spotify client secret")
+	flag.StringVar(&spotifyPlaylist, "spotify-playlist", "", "Spotify playlist to add music to")
 
 	flag.Parse()
 
@@ -43,6 +46,7 @@ func Parse() (*Config, error) {
 		Spotify: Spotify{
 			ClientID:     spotifyClientID,
 			ClientSecret: spotifyClientSecret,
+			Playlist:     spotifyPlaylist,
 		},
 	}
 
@@ -73,6 +77,10 @@ func (c *Config) validate() error {
 
 	if c.Spotify.ClientSecret == "" {
 		return errors.New("Spotify client secret is missing (--spotify-client-secret)")
+	}
+
+	if c.Spotify.Playlist == "" {
+		return errors.New("no Spotify playlist specified (--spotify-playlist")
 	}
 
 	return nil
