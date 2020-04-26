@@ -15,6 +15,7 @@ type Client struct {
 	Config    graw.Config
 	Script    reddit.Script
 	MusicChan spotify.MusicChan
+	Verbose   bool
 }
 
 func New(cfg *config.Config, m spotify.MusicChan) (*Client, error) {
@@ -25,11 +26,16 @@ func New(cfg *config.Config, m spotify.MusicChan) (*Client, error) {
 
 	gCfg := graw.Config{Subreddits: cfg.Reddit.Subs}
 
-	return &Client{
+	c := Client{
 		Config:    gCfg,
 		Script:    s,
 		MusicChan: m,
-	}, nil
+		Verbose:   cfg.Verbose,
+	}
+
+	c.Log("Reddit client set up")
+
+	return &c, nil
 }
 
 func (c *Client) Listen() error {
@@ -40,10 +46,12 @@ func (c *Client) Listen() error {
 
 	defer stop()
 
-	log.Println("Streaming from:\n")
+	if c.Verbose {
+		log.Println("Streaming from:")
 
-	for _, sub := range c.Config.Subreddits {
-		log.Println("r/" + sub)
+		for _, sub := range c.Config.Subreddits {
+			log.Println("r/" + sub)
+		}
 	}
 
 	if err := wait(); err != nil {
@@ -54,6 +62,7 @@ func (c *Client) Listen() error {
 }
 
 func (c *Client) Post(post *reddit.Post) error {
+	c.Log(fmt.Sprintf("Got Reddit post: %s: %s", post.Subreddit, post.Title))
 	c.MusicChan <- spotify.Music{
 		Sub:              post.Subreddit,
 		PostTitle:        post.Title,
@@ -62,4 +71,10 @@ func (c *Client) Post(post *reddit.Post) error {
 	}
 
 	return nil
+}
+
+func (c *Client) Log(s string) {
+	if c.Verbose {
+		log.Println(s)
+	}
 }

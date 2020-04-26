@@ -7,9 +7,13 @@ import (
 	"strings"
 )
 
+const version = "0.0.1"
+
 type Config struct {
 	Reddit  Reddit
 	Spotify Spotify
+	Version string
+	Verbose bool
 }
 
 type Reddit struct {
@@ -29,12 +33,14 @@ func Parse() (*Config, error) {
 	var spotifyClientID string
 	var spotifyClientSecret string
 	var spotifyPlaylist string
+	var verbose bool
 
 	flag.StringVar(&redditUsername, "reddit-username", "", "Reddit username")
 	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
 	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "Spotify client ID")
 	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "Spotify client secret")
 	flag.StringVar(&spotifyPlaylist, "spotify-playlist", "", "Spotify playlist to add music to")
+	flag.BoolVar(&verbose, "verbose", false, "Verbose log output")
 
 	flag.Parse()
 
@@ -48,6 +54,8 @@ func Parse() (*Config, error) {
 			ClientSecret: spotifyClientSecret,
 			Playlist:     spotifyPlaylist,
 		},
+		Version: version,
+		Verbose: verbose,
 	}
 
 	err := cfg.validate()
