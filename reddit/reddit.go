@@ -6,16 +6,18 @@ import (
 	"time"
 
 	"github.com/engvik/reddify/config"
+	"github.com/engvik/reddify/spotify"
 	"github.com/turnage/graw"
 	"github.com/turnage/graw/reddit"
 )
 
 type Client struct {
-	Config graw.Config
-	Script reddit.Script
+	Config    graw.Config
+	Script    reddit.Script
+	MusicChan spotify.MusicChan
 }
 
-func New(cfg *config.Config) (*Client, error) {
+func New(cfg *config.Config, m spotify.MusicChan) (*Client, error) {
 	s, err := reddit.NewScript(cfg.GetRedditUserAgent(), 5*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("new script: %w", err)
@@ -24,8 +26,9 @@ func New(cfg *config.Config) (*Client, error) {
 	gCfg := graw.Config{Subreddits: cfg.Reddit.Subs}
 
 	return &Client{
-		Config: gCfg,
-		Script: s,
+		Config:    gCfg,
+		Script:    s,
+		MusicChan: m,
 	}, nil
 }
 
@@ -51,8 +54,12 @@ func (c *Client) Listen() error {
 }
 
 func (c *Client) Post(post *reddit.Post) error {
-	log.Println(post.Subreddit, post.Title, post.Author)
-	log.Println(post)
-	log.Println("*******************")
+	c.MusicChan <- spotify.Music{
+		Sub:              post.Subreddit,
+		PostTitle:        post.Title,
+		MediaTitle:       post.Media.OEmbed.Title,
+		SecureMediaTitle: post.SecureMedia.OEmbed.Title,
+	}
+
 	return nil
 }

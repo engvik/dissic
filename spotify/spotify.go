@@ -2,6 +2,7 @@ package spotify
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/engvik/reddify/config"
@@ -9,12 +10,22 @@ import (
 	"github.com/zmb3/spotify"
 )
 
+type Music struct {
+	Sub              string
+	PostTitle        string
+	MediaTitle       string
+	SecureMediaTitle string
+}
+
+type MusicChan chan Music
+
 type Client struct {
-	Auth     spotify.Authenticator
-	AuthURL  string
-	Session  string
-	Playlist *spotify.FullPlaylist
-	C        spotify.Client
+	Auth      spotify.Authenticator
+	AuthURL   string
+	Session   string
+	MusicChan MusicChan
+	Playlist  *spotify.FullPlaylist
+	C         spotify.Client
 }
 
 const ErrInvalidID = "Invalid playlist Id"
@@ -23,8 +34,9 @@ func New(cfg *config.Config) (*Client, error) {
 	auth := spotify.NewAuthenticator("http://localhost:1337/spotifyAuth", spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistModifyPrivate, spotify.ScopePlaylistModifyPublic)
 
 	c := Client{
-		Auth:    auth,
-		Session: "asdasdff", // TODO: Generate
+		Auth:      auth,
+		Session:   "asdasdff", // TODO: Generate
+		MusicChan: make(chan Music),
 	}
 
 	c.Auth.SetAuthInfo(cfg.Spotify.ClientID, cfg.Spotify.ClientSecret)
@@ -85,4 +97,13 @@ func (c *Client) PreparePlaylist(name string) error {
 	c.Playlist = playlist
 
 	return nil
+}
+
+func (c *Client) Listen() {
+	for {
+		select {
+		case m := <-c.MusicChan:
+			log.Println(m)
+		}
+	}
 }

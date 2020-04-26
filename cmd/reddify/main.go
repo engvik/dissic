@@ -20,11 +20,6 @@ func main() {
 		log.Fatalf("error parsing config: %s", err.Error())
 	}
 
-	redditClient, err := reddit.New(cfg)
-	if err != nil {
-		log.Fatalf("error creating reddit client: %s", err.Error())
-	}
-
 	spotifyClient, err := spotify.New(cfg)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
@@ -43,6 +38,13 @@ func main() {
 
 	if err := spotifyClient.PreparePlaylist(cfg.Spotify.Playlist); err != nil {
 		log.Fatalf("error preparing playlist: %s", err.Error())
+	}
+
+	go spotifyClient.Listen()
+
+	redditClient, err := reddit.New(cfg, spotifyClient.MusicChan)
+	if err != nil {
+		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
 	if err := redditClient.Listen(); err != nil {
