@@ -2,16 +2,16 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/engvik/reddify/config"
 	"github.com/engvik/reddify/reddit"
+	"github.com/engvik/reddify/spotify"
 )
 
 func main() {
 
 	// TODO:
-	// * Load config
-	// * Read subreddits
 	// * Pick out artist / song
 	// * Add to spotify playlist
 
@@ -24,6 +24,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
+
+	spotifyClient, err := spotify.New(cfg)
+	if err != nil {
+		log.Fatalf("error creating reddit client: %s", err.Error())
+	}
+
+	http.HandleFunc("/spotifyAuth", spotifyClient.AuthHandler())
+	go http.ListenAndServe(":1337", nil)
 
 	if err := redditClient.Listen(); err != nil {
 		log.Fatalf("reddit listen error: %s", err.Error())
