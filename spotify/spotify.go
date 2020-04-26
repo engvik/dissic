@@ -47,6 +47,7 @@ func (c *Client) AuthHandler(authenticated chan bool) http.HandlerFunc {
 
 		c.C = c.Auth.NewClient(token)
 		authenticated <- true
+		w.Write([]byte("All good - you can close this window now"))
 	}
 }
 
