@@ -2,6 +2,7 @@ package reddit
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/engvik/reddify/config"
@@ -33,7 +34,14 @@ func (c *Client) Listen() error {
 	if err != nil {
 		return fmt.Errorf("graw scan failed: %w", err)
 	}
+
 	defer stop()
+
+	log.Println("Streaming from:\n")
+
+	for _, sub := range c.Config.Subreddits {
+		log.Println("r/" + sub)
+	}
 
 	if err := wait(); err != nil {
 		return fmt.Errorf("graw run encountered an error: %w", err)
@@ -43,6 +51,8 @@ func (c *Client) Listen() error {
 }
 
 func (c *Client) Post(post *reddit.Post) error {
-	fmt.Printf("%s posted %s\n", post.Author, post.Title)
+	log.Println(post.Subreddit, post.Title, post.Author)
+	log.Println(post)
+	log.Println("*******************")
 	return nil
 }

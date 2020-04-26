@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Reddit Reddit
+	Reddit  Reddit
+	Spotify Spotify
 }
 
 type Reddit struct {
@@ -16,12 +17,21 @@ type Reddit struct {
 	Subs     []string
 }
 
+type Spotify struct {
+	ClientID     string
+	ClientSecret string
+}
+
 func Parse() (*Config, error) {
 	var redditUsername string
 	var redditSubs string
+	var spotifyClientID string
+	var spotifyClientSecret string
 
 	flag.StringVar(&redditUsername, "reddit-username", "", "Reddit username")
 	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
+	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "Spotify client ID")
+	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "Spotify client secret")
 
 	flag.Parse()
 
@@ -29,6 +39,10 @@ func Parse() (*Config, error) {
 		Reddit: Reddit{
 			Username: redditUsername,
 			Subs:     strings.Split(redditSubs, ","),
+		},
+		Spotify: Spotify{
+			ClientID:     spotifyClientID,
+			ClientSecret: spotifyClientSecret,
 		},
 	}
 
@@ -51,6 +65,14 @@ func (c *Config) validate() error {
 
 	if len(c.Reddit.Subs) <= 0 {
 		return errors.New("no subreddits passed (--subreddits=a,b,c)")
+	}
+
+	if c.Spotify.ClientID == "" {
+		return errors.New("Spotify client ID is missing (--spotify-client-id)")
+	}
+
+	if c.Spotify.ClientSecret == "" {
+		return errors.New("Spotify client secret is missing (--spotify-client-secret)")
 	}
 
 	return nil
