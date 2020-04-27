@@ -60,7 +60,7 @@ func (c *Client) Listen() error {
 }
 
 func (c *Client) Post(post *reddit.Post) error {
-	c.log(fmt.Sprintf("got post: %s: %s", post.Subreddit, post.Title))
+	c.log(fmt.Sprintf("r/%s: %s (%s)", post.Subreddit, post.Title, post.URL))
 	c.MusicChan <- spotify.Music{
 		Sub:              post.Subreddit,
 		PostTitle:        post.Title,
