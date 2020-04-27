@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,9 +16,7 @@ func main() {
 		log.Fatalf("error parsing config: %s", err.Error())
 	}
 
-	if cfg.Verbose {
-		log.Printf("reddify %s\n", cfg.Version)
-	}
+	logger(cfg, fmt.Sprintf("version: %s\n", cfg.Version))
 
 	spotifyClient, err := spotify.New(cfg)
 	if err != nil {
@@ -26,9 +25,7 @@ func main() {
 
 	spotGotAuth := make(chan bool)
 
-	if cfg.Verbose {
-		log.Println("Awaiting Spotify authentication...")
-	}
+	logger(cfg, "awaiting spotify authentication...")
 
 	http.HandleFunc("/spotifyAuth", spotifyClient.AuthHandler(spotGotAuth))
 	go func() {
@@ -39,34 +36,32 @@ func main() {
 
 	<-spotGotAuth
 
-	if cfg.Verbose {
-		log.Println("Spotify client authenticated!")
-	}
+	logger(cfg, "spotify client authenticated!")
 
 	if err := spotifyClient.PreparePlaylist(cfg.Spotify.Playlist); err != nil {
 		log.Fatalf("error preparing playlist: %s", err.Error())
 	}
 
-	if cfg.Verbose {
-		log.Printf("Spotify playlist ready: %s (%s)\n", spotifyClient.Playlist.Name, spotifyClient.Playlist.ID)
-	}
+	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)\n", spotifyClient.Playlist.Name, spotifyClient.Playlist.ID))
 
 	go spotifyClient.Listen()
 
-	if cfg.Verbose {
-		log.Println("Spotify worker ready")
-	}
+	logger(cfg, "spotify worker ready")
 
 	redditClient, err := reddit.New(cfg, spotifyClient.MusicChan)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
-	if cfg.Verbose {
-		log.Println("Reddit worker ready")
-	}
+	logger(cfg, "reddit worker ready")
 
 	if err := redditClient.Listen(); err != nil {
 		log.Fatalf("reddit listen error: %s", err.Error())
+	}
+}
+
+func logger(cfg *config.Config, s string) {
+	if cfg.Verbose {
+		log.Printf("reddify:\t%s\n", s)
 	}
 }
