@@ -33,7 +33,7 @@ func New(cfg *config.Config, m spotify.MusicChan) (*Client, error) {
 		Verbose:   cfg.Verbose,
 	}
 
-	c.Log("Reddit client set up")
+	c.log("client setup ok")
 
 	return &c, nil
 }
@@ -46,12 +46,10 @@ func (c *Client) Listen() error {
 
 	defer stop()
 
-	if c.Verbose {
-		log.Println("Streaming from:")
+	c.log("watching subreddits:")
 
-		for _, sub := range c.Config.Subreddits {
-			log.Println("r/" + sub)
-		}
+	for _, sub := range c.Config.Subreddits {
+		c.log("\tr/" + sub)
 	}
 
 	if err := wait(); err != nil {
@@ -62,7 +60,7 @@ func (c *Client) Listen() error {
 }
 
 func (c *Client) Post(post *reddit.Post) error {
-	c.Log(fmt.Sprintf("Got Reddit post: %s: %s", post.Subreddit, post.Title))
+	c.log(fmt.Sprintf("got post: %s: %s", post.Subreddit, post.Title))
 	c.MusicChan <- spotify.Music{
 		Sub:              post.Subreddit,
 		PostTitle:        post.Title,
@@ -73,9 +71,9 @@ func (c *Client) Post(post *reddit.Post) error {
 	return nil
 }
 
-func (c *Client) Log(s string) {
+func (c *Client) log(s string) {
 	if c.Verbose {
-		log.Println(s)
+		log.Printf("reddit:\t%s\n", s)
 	}
 }
 

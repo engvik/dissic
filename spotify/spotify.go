@@ -48,7 +48,7 @@ func New(cfg *config.Config) (*Client, error) {
 		return nil, fmt.Errorf("error opening url: %w", err)
 	}
 
-	c.Log("Spotify client set up")
+	c.log("client setup ok")
 
 	return &c, nil
 }
@@ -73,7 +73,7 @@ func (c *Client) PreparePlaylist(name string) error {
 		return fmt.Errorf("error getting current user: %w", err)
 	}
 
-	c.Log(fmt.Sprintf("Retrived Spotify user: %s", user.ID))
+	c.log(fmt.Sprintf("retrived user: %s", user.ID))
 
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *Client) PreparePlaylist(name string) error {
 				return fmt.Errorf("error getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
 
-			c.Log(fmt.Sprintf("Found Spotify playlist: %s (%s)", p.Name, p.ID))
+			c.log(fmt.Sprintf("found playlist: %s (%s)", p.Name, p.ID))
 
 			break
 		}
@@ -101,7 +101,7 @@ func (c *Client) PreparePlaylist(name string) error {
 			return fmt.Errorf("error creating playlist %s: %w", name, err)
 		}
 
-		c.Log(fmt.Sprintf("Created Spotify playlist: %s", name))
+		c.log(fmt.Sprintf("created playlist: %s", name))
 	}
 
 	c.Playlist = playlist
@@ -118,8 +118,8 @@ func (c *Client) Listen() {
 	}
 }
 
-func (c *Client) Log(s string) {
+func (c *Client) log(s string) {
 	if c.Verbose {
-		log.Println(s)
+		log.Printf("spotify:\t%s\n", s)
 	}
 }
