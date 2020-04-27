@@ -16,7 +16,7 @@ func main() {
 		log.Fatalf("error parsing config: %s", err.Error())
 	}
 
-	logger(cfg, fmt.Sprintf("version: %s\n", cfg.Version))
+	logger(cfg, fmt.Sprintf("version: %s", cfg.Version))
 
 	spotifyClient, err := spotify.New(cfg)
 	if err != nil {
@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("error preparing playlist: %s", err.Error())
 	}
 
-	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)\n", spotifyClient.Playlist.Name, spotifyClient.Playlist.ID))
+	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)", spotifyClient.Playlist.Name, spotifyClient.Playlist.ID))
 
 	go spotifyClient.Listen()
 
