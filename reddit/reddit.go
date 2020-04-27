@@ -39,7 +39,7 @@ func New(cfg *config.Config, m spotify.MusicChan) (*Client, error) {
 }
 
 func (c *Client) Listen() error {
-	stop, wait, err := graw.Scan(&Client{}, c.Script, c.Config)
+	stop, wait, err := graw.Scan(c, c.Script, c.Config)
 	if err != nil {
 		return fmt.Errorf("graw scan failed: %w", err)
 	}
