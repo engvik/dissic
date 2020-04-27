@@ -24,7 +24,7 @@ func New(cfg *config.Config, m spotify.MusicChan) (*Client, error) {
 		return nil, fmt.Errorf("new script: %w", err)
 	}
 
-	gCfg := graw.Config{Subreddits: cfg.Reddit.Subs}
+	gCfg := graw.Config{Subreddits: cleanSubNames(cfg.Reddit.Subs)}
 
 	c := Client{
 		Config:    gCfg,
@@ -77,4 +77,14 @@ func (c *Client) Log(s string) {
 	if c.Verbose {
 		log.Println(s)
 	}
+}
+
+func cleanSubNames(subs []string) []string {
+	for i, sub := range subs {
+		if sub[:2] == "r/" {
+			subs[i] = sub[2:]
+		}
+	}
+
+	return subs
 }
