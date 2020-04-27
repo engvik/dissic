@@ -113,9 +113,52 @@ func (c *Client) Listen() {
 	for {
 		select {
 		case m := <-c.MusicChan:
-			log.Println("***", m)
+			go c.Handle(m)
 		}
 	}
+}
+
+func (c *Client) Handle(m Music) {
+	c.log(fmt.Sprintf("%+v\n", m))
+
+	if m.PostTitle != "" {
+		res, err := c.Search(m.SecureMediaTitle)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		log.Printf("%+v", res)
+		// TODO: Determine if ok
+	}
+
+	if m.SecureMediaTitle != "" {
+		res, err := c.Search(m.SecureMediaTitle)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		log.Printf("%+v", res)
+		// TODO: Determine if ok
+	}
+
+	if m.MediaTitle != "" {
+		res, err := c.Search(m.SecureMediaTitle)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		log.Printf("%+v", res)
+		// TODO: Determine if ok
+	}
+}
+
+func (c *Client) Search(q string) (*spotify.SearchResult, error) {
+	res, err := c.C.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
+	if err != nil {
+		return nil, fmt.Errorf("error searching: %w", err)
+	}
+
+	return res, nil
 }
 
 func (c *Client) log(s string) {
