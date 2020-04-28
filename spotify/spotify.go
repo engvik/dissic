@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"github.com/engvik/reddify/config"
 	"github.com/pkg/browser"
@@ -16,6 +18,10 @@ type Music struct {
 	PostTitle        string
 	MediaTitle       string
 	SecureMediaTitle string
+}
+
+func (m *Music) titleStringArray() []string {
+	return []string{m.PostTitle, m.MediaTitle, m.SecureMediaTitle}
 }
 
 type MusicChan chan Music
@@ -152,67 +158,87 @@ func (c *Client) Listen() {
 }
 
 func (c *Client) Handle(m Music) {
-	c.log(fmt.Sprintf("%+v\n", m))
+	for _, title := range m.titleStringArray() {
+		if title == "" {
+			continue
+		}
 
-	// TODO:
-	// - Pick best title
-	// - try to retrive artist + song
-	// - look for year
-	// - maybe even grab tags?
-
-	if m.PostTitle != "" {
-		res, err := c.Search(m.PostTitle)
+		track, err := c.getTrack(title)
 		if err != nil {
-			log.Println(err.Error())
+			c.log(err.Error())
+			continue
 		}
 
-		log.Printf("search: %+v", *res)
-
-		c.log(fmt.Sprintf("tracks: %d", len(res.Tracks.Tracks)))
-		c.log(fmt.Sprintf("albums: %d", len(res.Albums.Albums)))
-		c.log(fmt.Sprintf("artists: %d", len(res.Artists.Artists)))
-		for _, t := range res.Tracks.Tracks {
-			c.log("track: " + t.String())
+		if err := c.addToPlaylist(track.ID); err != nil {
+			c.log(fmt.Sprintf("error adding track to playlist: %s", err.Error()))
 		}
 
-		for _, a := range res.Albums.Albums {
-			c.log("album: " + a.Name)
-		}
-		for _, a := range res.Artists.Artists {
-			c.log("artist: " + a.Name)
-		}
-
-		// TODO: Determine if ok
+		return
 	}
-
-	/*	if m.SecureMediaTitle != "" {
-			res, err := c.Search(m.SecureMediaTitle)
-			if err != nil {
-				log.Println(err.Error())
-			}
-
-			log.Printf("%+v", res)
-			// TODO: Determine if ok
-		}
-
-		if m.MediaTitle != "" {
-			res, err := c.Search(m.SecureMediaTitle)
-			if err != nil {
-				log.Println(err.Error())
-			}
-
-			log.Printf("%+v", res)
-			// TODO: Determine if ok
-		} */
 }
 
-func (c *Client) Search(q string) (*spotify.SearchResult, error) {
+func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
+	var track spotify.FullTrack
+
+	sq, err := c.createSearchQuery(title)
+	if err != nil {
+		return track, fmt.Errorf("\tsearch query: %w", err)
+	}
+
+	c.log(fmt.Sprintf("\tsearch query: %s from title: %s", sq, title))
+
+	res, err := c.search(sq)
+	if err != nil {
+		return track, fmt.Errorf("\terror searching: %w", err)
+	}
+
+	for _, t := range res.Tracks.Tracks {
+		if strings.Contains(title, t.Name) {
+			for _, artist := range t.Artists {
+				if strings.Contains(title, artist.Name) {
+					c.log(fmt.Sprintf("\ttrack found: %s (%s)", title, t.ID))
+					return t, nil
+				}
+			}
+		}
+	}
+
+	return track, errors.New(fmt.Sprintf("\tno track found: %s", title))
+}
+
+func (c *Client) createSearchQuery(t string) (string, error) {
+	re := regexp.MustCompile(`\(([^)]+)\)|\[([^)]+)\]`)
+	replacedTitle := re.ReplaceAll([]byte(t), []byte(""))
+	title := string(replacedTitle)
+
+	splitTitle := strings.Split(title, " - ")
+
+	if len(splitTitle) <= 1 {
+		return "", errors.New(fmt.Sprintf("no artist and title found: %s", title))
+	}
+
+	title = strings.Join(splitTitle, "  ")
+
+	return title, nil
+}
+
+func (c *Client) search(q string) (*spotify.SearchResult, error) {
 	res, err := c.C.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 	if err != nil {
 		return nil, fmt.Errorf("error searching: %w", err)
 	}
 
 	return res, nil
+}
+
+func (c *Client) addToPlaylist(ID spotify.ID) error {
+	snapshotID, err := c.C.AddTracksToPlaylist(c.Playlist.ID, ID)
+	if err != nil {
+		return fmt.Errorf("error adding track to playlist %s: %w", ID, err)
+	}
+
+	c.log(fmt.Sprintf("added track to playlist, snapshot id: %s", snapshotID))
+	return nil
 }
 
 func (c *Client) log(s string) {
