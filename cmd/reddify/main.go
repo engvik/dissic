@@ -29,7 +29,7 @@ func main() {
 
 	http.HandleFunc("/spotifyAuth", spotifyClient.AuthHandler(spotGotAuth))
 	go func() {
-		if err := http.ListenAndServe(":1337", nil); err != nil {
+		if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.HTTPPort), nil); err != nil {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
 	}()

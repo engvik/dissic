@@ -39,7 +39,8 @@ type Client struct {
 const ErrInvalidID = "Invalid playlist Id"
 
 func New(cfg *config.Config) (*Client, error) {
-	auth := spotify.NewAuthenticator("http://localhost:1337/spotifyAuth", spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistModifyPrivate, spotify.ScopePlaylistModifyPublic)
+	callbackURL := fmt.Sprintf("http://localhost:%s/spotifyAuth", cfg.HTTPPort)
+	auth := spotify.NewAuthenticator(callbackURL, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistModifyPrivate, spotify.ScopePlaylistModifyPublic)
 
 	c := Client{
 		Auth:      auth,
