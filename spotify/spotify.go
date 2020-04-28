@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -67,17 +68,51 @@ func (c *Client) AuthHandler(authenticated chan bool) http.HandlerFunc {
 	}
 }
 
-func (c *Client) PreparePlaylist(name string) error {
+func (c *Client) PreparePlaylist(cfg *config.Config) error {
+	var playlist *spotify.FullPlaylist
+	var err error
+
+	if cfg.Spotify.PlaylistID != "" {
+		playlist, err = c.preparePlaylistByID(cfg.Spotify.PlaylistID)
+	} else if cfg.Spotify.PlaylistName != "" {
+		playlist, err = c.preparePlaylistByName(cfg.Spotify.PlaylistName)
+	}
+
+	if err != nil {
+		return fmt.Errorf("error getting playlist: %w", err)
+	}
+
+	if playlist == nil {
+		return errors.New("unable to get spotify playlist")
+	}
+
+	c.Playlist = playlist
+
+	return nil
+}
+
+func (c *Client) preparePlaylistByID(ID string) (*spotify.FullPlaylist, error) {
+	playlist, err := c.C.GetPlaylist(spotify.ID(ID))
+	if err != nil {
+		return nil, fmt.Errorf("error getting playlist %s: %w", ID, err)
+	}
+
+	c.log(fmt.Sprintf("found playlist: %s (%s)", playlist.Name, playlist.ID))
+
+	return playlist, nil
+}
+
+func (c *Client) preparePlaylistByName(name string) (*spotify.FullPlaylist, error) {
 	user, err := c.C.CurrentUser()
 	if err != nil {
-		return fmt.Errorf("error getting current user: %w", err)
+		return nil, fmt.Errorf("error getting current user: %w", err)
 	}
 
 	c.log(fmt.Sprintf("retrived user: %s", user.ID))
 
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
-		return fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
+		return nil, fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
 	}
 
 	var playlist *spotify.FullPlaylist
@@ -86,7 +121,7 @@ func (c *Client) PreparePlaylist(name string) error {
 		if p.Name == name {
 			playlist, err = c.C.GetPlaylist(p.ID)
 			if err != nil {
-				return fmt.Errorf("error getting playlist %s (%s): %w", p.Name, p.ID, err)
+				return nil, fmt.Errorf("error getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
 
 			c.log(fmt.Sprintf("found playlist: %s (%s)", p.Name, p.ID))
@@ -98,15 +133,13 @@ func (c *Client) PreparePlaylist(name string) error {
 	if playlist == nil {
 		playlist, err = c.C.CreatePlaylistForUser(user.ID, name, "reddify", false)
 		if err != nil {
-			return fmt.Errorf("error creating playlist %s: %w", name, err)
+			return nil, fmt.Errorf("error creating playlist %s: %w", name, err)
 		}
 
 		c.log(fmt.Sprintf("created playlist: %s", name))
 	}
 
-	c.Playlist = playlist
-
-	return nil
+	return playlist, nil
 }
 
 func (c *Client) Listen() {
@@ -121,35 +154,56 @@ func (c *Client) Listen() {
 func (c *Client) Handle(m Music) {
 	c.log(fmt.Sprintf("%+v\n", m))
 
+	// TODO:
+	// - Pick best title
+	// - try to retrive artist + song
+	// - look for year
+	// - maybe even grab tags?
+
 	if m.PostTitle != "" {
-		res, err := c.Search(m.SecureMediaTitle)
+		res, err := c.Search(m.PostTitle)
 		if err != nil {
 			log.Println(err.Error())
 		}
 
-		log.Printf("%+v", res)
-		// TODO: Determine if ok
-	}
+		log.Printf("search: %+v", *res)
 
-	if m.SecureMediaTitle != "" {
-		res, err := c.Search(m.SecureMediaTitle)
-		if err != nil {
-			log.Println(err.Error())
+		c.log(fmt.Sprintf("tracks: %d", len(res.Tracks.Tracks)))
+		c.log(fmt.Sprintf("albums: %d", len(res.Albums.Albums)))
+		c.log(fmt.Sprintf("artists: %d", len(res.Artists.Artists)))
+		for _, t := range res.Tracks.Tracks {
+			c.log("track: " + t.String())
 		}
 
-		log.Printf("%+v", res)
-		// TODO: Determine if ok
-	}
-
-	if m.MediaTitle != "" {
-		res, err := c.Search(m.SecureMediaTitle)
-		if err != nil {
-			log.Println(err.Error())
+		for _, a := range res.Albums.Albums {
+			c.log("album: " + a.Name)
+		}
+		for _, a := range res.Artists.Artists {
+			c.log("artist: " + a.Name)
 		}
 
-		log.Printf("%+v", res)
 		// TODO: Determine if ok
 	}
+
+	/*	if m.SecureMediaTitle != "" {
+			res, err := c.Search(m.SecureMediaTitle)
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			log.Printf("%+v", res)
+			// TODO: Determine if ok
+		}
+
+		if m.MediaTitle != "" {
+			res, err := c.Search(m.SecureMediaTitle)
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			log.Printf("%+v", res)
+			// TODO: Determine if ok
+		} */
 }
 
 func (c *Client) Search(q string) (*spotify.SearchResult, error) {

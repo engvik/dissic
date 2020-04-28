@@ -38,7 +38,7 @@ func main() {
 
 	logger(cfg, "spotify client authenticated!")
 
-	if err := spotifyClient.PreparePlaylist(cfg.Spotify.Playlist); err != nil {
+	if err := spotifyClient.PreparePlaylist(cfg); err != nil {
 		log.Fatalf("error preparing playlist: %s", err.Error())
 	}
 

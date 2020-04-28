@@ -24,7 +24,8 @@ type Reddit struct {
 type Spotify struct {
 	ClientID     string
 	ClientSecret string
-	Playlist     string
+	PlaylistName string
+	PlaylistID   string
 }
 
 func Parse() (*Config, error) {
@@ -32,14 +33,16 @@ func Parse() (*Config, error) {
 	var redditSubs string
 	var spotifyClientID string
 	var spotifyClientSecret string
-	var spotifyPlaylist string
+	var spotifyPlaylistName string
+	var spotifyPlaylistID string
 	var verbose bool
 
 	flag.StringVar(&redditUsername, "reddit-username", "", "Reddit username")
 	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
 	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "Spotify client ID")
 	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "Spotify client secret")
-	flag.StringVar(&spotifyPlaylist, "spotify-playlist", "", "Spotify playlist to add music to")
+	flag.StringVar(&spotifyPlaylistName, "spotify-playlist-name", "", "Spotify playlist name to add music to")
+	flag.StringVar(&spotifyPlaylistID, "spotify-playlist-id", "", "Spotify playlist id to add music to")
 	flag.BoolVar(&verbose, "verbose", false, "Verbose log output")
 
 	flag.Parse()
@@ -52,7 +55,8 @@ func Parse() (*Config, error) {
 		Spotify: Spotify{
 			ClientID:     spotifyClientID,
 			ClientSecret: spotifyClientSecret,
-			Playlist:     spotifyPlaylist,
+			PlaylistName: spotifyPlaylistName,
+			PlaylistID:   spotifyPlaylistID,
 		},
 		Version: version,
 		Verbose: verbose,
@@ -67,12 +71,12 @@ func Parse() (*Config, error) {
 }
 
 func (c *Config) GetRedditUserAgent() string {
-	return fmt.Sprintf("graw:reddify:0.0.1 by /u/%s", c.Reddit.Username)
+	return fmt.Sprintf("graw:reddify:%s by /u/%s", c.Version, c.Reddit.Username)
 }
 
 func (c *Config) validate() error {
 	if c.Reddit.Username == "" {
-		return errors.New("Reddit username is missing (--reddit-username)")
+		return errors.New("reddit username is missing (--reddit-username)")
 	}
 
 	if len(c.Reddit.Subs) <= 0 {
@@ -80,15 +84,15 @@ func (c *Config) validate() error {
 	}
 
 	if c.Spotify.ClientID == "" {
-		return errors.New("Spotify client ID is missing (--spotify-client-id)")
+		return errors.New("spotify client id is missing (--spotify-client-id)")
 	}
 
 	if c.Spotify.ClientSecret == "" {
-		return errors.New("Spotify client secret is missing (--spotify-client-secret)")
+		return errors.New("spotify client secret is missing (--spotify-client-secret)")
 	}
 
-	if c.Spotify.Playlist == "" {
-		return errors.New("no Spotify playlist specified (--spotify-playlist")
+	if c.Spotify.PlaylistName == "" && c.Spotify.PlaylistID == "" {
+		return errors.New("no spotify playlist specified (--spotify-playlist-name or --spotify-playlist-id)")
 	}
 
 	return nil
