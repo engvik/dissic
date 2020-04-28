@@ -46,7 +46,7 @@ func (c *Client) Listen() error {
 
 	defer stop()
 
-	c.log("watching subreddits:")
+	c.log(fmt.Sprintf("watching %d subreddits:", len(c.Config.Subreddits)))
 
 	for _, sub := range c.Config.Subreddits {
 		c.log("\tr/" + sub)

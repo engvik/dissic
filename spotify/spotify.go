@@ -165,12 +165,12 @@ func (c *Client) Handle(m Music) {
 
 		track, err := c.getTrack(title)
 		if err != nil {
-			c.log(err.Error())
+			c.log(fmt.Sprintf("\terror getting track: %s", err.Error()))
 			continue
 		}
 
 		if err := c.addToPlaylist(track.ID); err != nil {
-			c.log(fmt.Sprintf("error adding track to playlist: %s", err.Error()))
+			c.log(fmt.Sprintf("\terror adding track to playlist: %s", err.Error()))
 		}
 
 		return
@@ -182,14 +182,14 @@ func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
 
 	sq, err := c.createSearchQuery(title)
 	if err != nil {
-		return track, fmt.Errorf("\tsearch query: %w", err)
+		return track, fmt.Errorf("search query: %w", err)
 	}
 
 	c.log(fmt.Sprintf("\tsearch query: %s from title: %s", sq, title))
 
 	res, err := c.search(sq)
 	if err != nil {
-		return track, fmt.Errorf("\terror searching: %w", err)
+		return track, fmt.Errorf("error searching: %w", err)
 	}
 
 	for _, t := range res.Tracks.Tracks {
@@ -203,7 +203,7 @@ func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
 		}
 	}
 
-	return track, errors.New(fmt.Sprintf("\tno track found: %s", title))
+	return track, errors.New(fmt.Sprintf("no track found: %s", title))
 }
 
 func (c *Client) createSearchQuery(t string) (string, error) {
@@ -217,7 +217,7 @@ func (c *Client) createSearchQuery(t string) (string, error) {
 		return "", errors.New(fmt.Sprintf("no artist and title found: %s", title))
 	}
 
-	title = strings.Join(splitTitle, "  ")
+	title = strings.Join(splitTitle, " ")
 
 	return title, nil
 }
@@ -237,7 +237,7 @@ func (c *Client) addToPlaylist(ID spotify.ID) error {
 		return fmt.Errorf("error adding track to playlist %s: %w", ID, err)
 	}
 
-	c.log(fmt.Sprintf("added track to playlist, snapshot id: %s", snapshotID))
+	c.log(fmt.Sprintf("\tadded track to playlist, snapshot id: %s", snapshotID))
 	return nil
 }
 
