@@ -10,10 +10,11 @@ import (
 const version = "0.0.1"
 
 type Config struct {
-	Reddit  Reddit
-	Spotify Spotify
-	Version string
-	Verbose bool
+	Reddit   Reddit
+	Spotify  Spotify
+	Version  string
+	HTTPPort string
+	Verbose  bool
 }
 
 type Reddit struct {
@@ -35,15 +36,17 @@ func Parse() (*Config, error) {
 	var spotifyClientSecret string
 	var spotifyPlaylistName string
 	var spotifyPlaylistID string
+	var HTTPPort string
 	var verbose bool
 
-	flag.StringVar(&redditUsername, "reddit-username", "", "Reddit username")
+	flag.StringVar(&redditUsername, "reddit-username", "", "reddit username")
 	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
-	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "Spotify client ID")
-	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "Spotify client secret")
-	flag.StringVar(&spotifyPlaylistName, "spotify-playlist-name", "", "Spotify playlist name to add music to")
-	flag.StringVar(&spotifyPlaylistID, "spotify-playlist-id", "", "Spotify playlist id to add music to")
-	flag.BoolVar(&verbose, "verbose", false, "Verbose log output")
+	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "spotify client id")
+	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "spotify client secret")
+	flag.StringVar(&spotifyPlaylistName, "spotify-playlist-name", "", "spotify playlist name to add music to")
+	flag.StringVar(&spotifyPlaylistID, "spotify-playlist-id", "", "spotify playlist id to add music to")
+	flag.StringVar(&HTTPPort, "http-port", "8080", "http port")
+	flag.BoolVar(&verbose, "verbose", false, "verbose log output")
 
 	flag.Parse()
 
@@ -58,8 +61,9 @@ func Parse() (*Config, error) {
 			PlaylistName: spotifyPlaylistName,
 			PlaylistID:   spotifyPlaylistID,
 		},
-		Version: version,
-		Verbose: verbose,
+		Version:  version,
+		HTTPPort: HTTPPort,
+		Verbose:  verbose,
 	}
 
 	err := cfg.validate()
