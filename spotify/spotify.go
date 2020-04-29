@@ -213,8 +213,7 @@ func (c *Client) createSearchQuery(t string) (string, error) {
 	re := regexp.MustCompile(`\(([^)]+)\)|\[([^)]+)\]`)
 	replacedTitle := re.ReplaceAll([]byte(t), []byte(""))
 	title := string(replacedTitle)
-
-	// TODO: Strip '' from title
+	title = strings.ReplaceAll(title, "'", "")
 	// TODO: Support :, ~, | etc. separators
 	// TODO: Support bandcamp style: FLOWERS & OBITUARIES SAME DAY, by Alexander Technique
 	splitTitle := strings.Split(title, " - ")
