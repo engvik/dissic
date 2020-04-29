@@ -193,10 +193,12 @@ func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
 		return track, fmt.Errorf("error searching: %w", err)
 	}
 
+	title = strings.ToLower(title)
+
 	for _, t := range res.Tracks.Tracks {
-		if strings.Contains(title, t.Name) {
+		if strings.Contains(title, strings.ToLower(t.Name)) {
 			for _, artist := range t.Artists {
-				if strings.Contains(title, artist.Name) {
+				if strings.Contains(title, strings.ToLower(artist.Name)) {
 					c.log(fmt.Sprintf("\ttrack found: %s (%s)", title, t.ID))
 					return t, nil
 				}
@@ -212,6 +214,9 @@ func (c *Client) createSearchQuery(t string) (string, error) {
 	replacedTitle := re.ReplaceAll([]byte(t), []byte(""))
 	title := string(replacedTitle)
 
+	// TODO: Strip '' from title
+	// TODO: Support :, ~, | etc. separators
+	// TODO: Support bandcamp style: FLOWERS & OBITUARIES SAME DAY, by Alexander Technique
 	splitTitle := strings.Split(title, " - ")
 
 	if len(splitTitle) <= 1 {
@@ -219,6 +224,7 @@ func (c *Client) createSearchQuery(t string) (string, error) {
 	}
 
 	title = strings.Join(splitTitle, " ")
+	title = strings.TrimSpace(title)
 
 	return title, nil
 }
