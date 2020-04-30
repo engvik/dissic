@@ -18,37 +18,35 @@ func main() {
 
 	logger(cfg, fmt.Sprintf("version: %s", cfg.Version))
 
-	spotifyClient, err := spotify.New(cfg)
+	s, err := spotify.New(cfg)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
-	spotGotAuth := make(chan bool)
-
-	logger(cfg, "awaiting spotify authentication...")
-
-	http.HandleFunc("/spotifyAuth", spotifyClient.AuthHandler(spotGotAuth))
+	http.HandleFunc("/spotifyAuth", s.AuthHandler())
 	go func() {
 		if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.HTTPPort), nil); err != nil {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
 	}()
 
-	<-spotGotAuth
+	logger(cfg, "awaiting spotify authentication...")
+
+	<-s.AuthChan
 
 	logger(cfg, "spotify client authenticated!")
 
-	if err := spotifyClient.PreparePlaylist(cfg); err != nil {
+	if err := s.PreparePlaylist(cfg); err != nil {
 		log.Fatalf("error preparing playlist: %s", err.Error())
 	}
 
-	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)", spotifyClient.Playlist.Name, spotifyClient.Playlist.ID))
+	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
 
-	go spotifyClient.Listen()
+	go s.Listen()
 
 	logger(cfg, "spotify worker ready")
 
-	redditClient, err := reddit.New(cfg, spotifyClient.MusicChan)
+	redditClient, err := reddit.New(cfg, s.MusicChan)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
