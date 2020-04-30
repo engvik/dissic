@@ -24,13 +24,12 @@ func (m *Music) titleStringArray() []string {
 	return []string{m.PostTitle, m.MediaTitle, m.SecureMediaTitle}
 }
 
-type MusicChan chan Music
-
 type Client struct {
 	Auth      spotify.Authenticator
 	AuthURL   string
 	Session   string
-	MusicChan MusicChan
+	AuthChan  chan bool
+	MusicChan chan Music
 	Playlist  *spotify.FullPlaylist
 	C         spotify.Client
 	Verbose   bool
@@ -45,6 +44,7 @@ func New(cfg *config.Config) (*Client, error) {
 	c := Client{
 		Auth:      auth,
 		Session:   "asdasdff", // TODO: Generate
+		AuthChan:  make(chan bool),
 		MusicChan: make(chan Music),
 		Verbose:   cfg.Verbose,
 	}
@@ -61,7 +61,7 @@ func New(cfg *config.Config) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) AuthHandler(authenticated chan bool) http.HandlerFunc {
+func (c *Client) AuthHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := c.Auth.Token(c.Session, r)
 		if err != nil {
@@ -70,7 +70,7 @@ func (c *Client) AuthHandler(authenticated chan bool) http.HandlerFunc {
 		}
 
 		c.C = c.Auth.NewClient(token)
-		authenticated <- true
+		c.AuthChan <- true
 		w.Write([]byte("All good - you can close this window now"))
 	}
 }
