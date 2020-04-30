@@ -46,14 +46,14 @@ func main() {
 
 	logger(cfg, "spotify worker ready")
 
-	redditClient, err := reddit.New(cfg, s.MusicChan)
+	r, err := reddit.New(cfg, s.MusicChan)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
 	logger(cfg, "reddit worker ready")
 
-	if err := redditClient.Listen(); err != nil {
+	if err := r.Listen(); err != nil {
 		log.Fatalf("reddit listen error: %s", err.Error())
 	}
 }
