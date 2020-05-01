@@ -35,6 +35,7 @@ func main() {
 
 	logger(cfg, "awaiting spotify authentication...")
 
+	s.Authenticate()
 	<-s.AuthChan
 
 	logger(cfg, "spotify client authenticated!")
@@ -67,6 +68,7 @@ func main() {
 
 		s.Close()
 		r.Close()
+		logger(cfg, "bye, bye!")
 	}(s, r)
 
 }
