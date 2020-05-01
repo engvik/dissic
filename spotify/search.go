@@ -17,7 +17,7 @@ func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
 		return track, fmt.Errorf("search query: %w", err)
 	}
 
-	c.log(fmt.Sprintf("\tsearch query: %s from title: %s", sq, title))
+	c.Log(fmt.Sprintf("\tsearch query: %s from title: %s", sq, title))
 
 	res, err := c.search(sq)
 	if err != nil {
@@ -30,7 +30,7 @@ func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
 		if strings.Contains(cmprTitle, strings.ToLower(t.Name)) {
 			for _, artist := range t.Artists {
 				if strings.Contains(cmprTitle, strings.ToLower(artist.Name)) { // TODO attempt replacing & with and in title
-					c.log(fmt.Sprintf("\ttrack found: %s (%s)", title, t.ID))
+					c.Log(fmt.Sprintf("\ttrack found: %s (%s)", title, t.ID))
 					return t, nil
 				}
 			}

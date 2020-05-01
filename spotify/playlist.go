@@ -39,7 +39,7 @@ func (c *Client) preparePlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 		return nil, fmt.Errorf("error getting playlist %s: %w", ID, err)
 	}
 
-	c.log(fmt.Sprintf("found playlist: %s (%s)", playlist.Name, playlist.ID))
+	c.Log(fmt.Sprintf("found playlist: %s (%s)", playlist.Name, playlist.ID))
 
 	return playlist, nil
 }
@@ -50,7 +50,7 @@ func (c *Client) preparePlaylistByName(name string) (*spotify.FullPlaylist, erro
 		return nil, fmt.Errorf("error getting current user: %w", err)
 	}
 
-	c.log(fmt.Sprintf("retrived user: %s", user.ID))
+	c.Log(fmt.Sprintf("retrived user: %s", user.ID))
 
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
@@ -66,7 +66,7 @@ func (c *Client) preparePlaylistByName(name string) (*spotify.FullPlaylist, erro
 				return nil, fmt.Errorf("error getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
 
-			c.log(fmt.Sprintf("found playlist: %s (%s)", p.Name, p.ID))
+			c.Log(fmt.Sprintf("found playlist: %s (%s)", p.Name, p.ID))
 
 			break
 		}
@@ -78,7 +78,7 @@ func (c *Client) preparePlaylistByName(name string) (*spotify.FullPlaylist, erro
 			return nil, fmt.Errorf("error creating playlist %s: %w", name, err)
 		}
 
-		c.log(fmt.Sprintf("created playlist: %s", name))
+		c.Log(fmt.Sprintf("created playlist: %s", name))
 	}
 
 	return playlist, nil
@@ -90,6 +90,6 @@ func (c *Client) addToPlaylist(ID spotify.ID) error {
 		return fmt.Errorf("error adding track to playlist %s: %w", ID, err)
 	}
 
-	c.log(fmt.Sprintf("\tadded track to playlist, snapshot id: %s", snapshotID))
+	c.Log(fmt.Sprintf("\tadded track to playlist, snapshot id: %s", snapshotID))
 	return nil
 }

@@ -35,7 +35,7 @@ func New(cfg *config.Config) (*Client, error) {
 	c.Auth.SetAuthInfo(cfg.Spotify.ClientID, cfg.Spotify.ClientSecret)
 	c.AuthURL = c.Auth.AuthURL(c.Session)
 
-	c.log("client setup ok")
+	c.Log("client setup ok")
 
 	return &c, nil
 }
@@ -65,26 +65,26 @@ func (c *Client) handle(m Music) {
 
 		track, err := c.getTrack(title)
 		if err != nil {
-			c.log(fmt.Sprintf("\terror getting track: %s", err.Error()))
+			c.Log(fmt.Sprintf("\terror getting track: %s", err.Error()))
 			continue
 		}
 
 		if err := c.addToPlaylist(track.ID); err != nil {
-			c.log(fmt.Sprintf("\terror adding track to playlist: %s", err.Error()))
+			c.Log(fmt.Sprintf("\terror adding track to playlist: %s", err.Error()))
 		}
 
 		return
 	}
 }
 
-func (c *Client) log(s string) {
+func (c *Client) Log(s string) {
 	if c.Verbose {
 		log.Printf("spotify:\t%s\n", s)
 	}
 }
 
 func (c *Client) Close() {
-	c.log("shutting down")
+	c.Log("shutting down")
 	close(c.AuthChan)
 	close(c.MusicChan)
 }
