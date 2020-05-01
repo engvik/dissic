@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/engvik/reddify/config"
 	"github.com/engvik/reddify/reddit"
@@ -42,20 +45,30 @@ func main() {
 
 	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
 
-	go s.Listen()
-
-	logger(cfg, "spotify worker ready")
-
 	r, err := reddit.New(cfg, s.MusicChan)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
-	logger(cfg, "reddit worker ready")
-
-	if err := r.Listen(); err != nil {
-		log.Fatalf("reddit listen error: %s", err.Error())
+	if err := r.Prepare(); err != nil {
+		log.Fatalf("error preparing reddit/graw scanner: %s", err.Error())
 	}
+
+	func(s *spotify.Client, r *reddit.Client) {
+		shutdown := make(chan os.Signal, 1)
+		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+
+		go s.Listen()
+		logger(cfg, "spotify worker ready")
+		go r.Listen()
+		logger(cfg, "reddit worker ready")
+
+		<-shutdown
+
+		s.Close()
+		r.Close()
+	}(s, r)
+
 }
 
 func logger(cfg *config.Config, s string) {
