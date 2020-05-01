@@ -76,13 +76,3 @@ func (c *Client) search(q string) (*spotify.SearchResult, error) {
 
 	return res, nil
 }
-
-func (c *Client) addToPlaylist(ID spotify.ID) error {
-	snapshotID, err := c.C.AddTracksToPlaylist(c.Playlist.ID, ID)
-	if err != nil {
-		return fmt.Errorf("error adding track to playlist %s: %w", ID, err)
-	}
-
-	c.log(fmt.Sprintf("\tadded track to playlist, snapshot id: %s", snapshotID))
-	return nil
-}
