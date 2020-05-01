@@ -78,3 +78,9 @@ func (c *Client) log(s string) {
 		log.Printf("spotify:\t%s\n", s)
 	}
 }
+
+func (c *Client) Close() {
+	c.log("shutting down")
+	close(c.AuthChan)
+	close(c.MusicChan)
+}

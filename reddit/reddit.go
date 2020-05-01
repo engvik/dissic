@@ -15,6 +15,9 @@ type Client struct {
 	Config    graw.Config
 	Script    reddit.Script
 	MusicChan chan spotify.Music
+	Retry     time.Duration
+	Stop      func()
+	Wait      func() error
 	Verbose   bool
 }
 
@@ -30,6 +33,7 @@ func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
 		Config:    gCfg,
 		Script:    s,
 		MusicChan: m,
+		Retry:     time.Duration(10), // TODO: make configurable
 		Verbose:   cfg.Verbose,
 	}
 
@@ -38,25 +42,44 @@ func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) Listen() error {
+func (c *Client) Prepare() error {
 	stop, wait, err := graw.Scan(c, c.Script, c.Config)
 	if err != nil {
-		return fmt.Errorf("graw scan failed: %w", err)
+		return fmt.Errorf("graw preparation failed: %w", err)
 	}
 
-	defer stop()
+	c.Stop = stop
+	c.Wait = wait
 
+	return nil
+	/*
+		defer stop()
+
+
+		return nil
+	*/
+}
+
+func (c *Client) Listen() {
 	c.log(fmt.Sprintf("watching %d subreddits:", len(c.Config.Subreddits)))
 
 	for _, sub := range c.Config.Subreddits {
 		c.log("\tr/" + sub)
 	}
 
-	if err := wait(); err != nil {
-		return fmt.Errorf("graw run encountered an error: %w", err)
-	}
+	for {
+		if err := c.Wait(); err != nil {
+			c.log(fmt.Sprintf("reddit/graw error: %s", err.Error()))
+		}
 
-	return nil
+		c.log(fmt.Sprintf("restarting reddit worker in %s seconds", c.Retry))
+		time.Sleep(c.Retry * time.Second)
+	}
+}
+
+func (c *Client) Close() {
+	c.log("shutting down")
+	c.Stop()
 }
 
 func (c *Client) Post(post *reddit.Post) error {
