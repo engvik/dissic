@@ -33,18 +33,18 @@ func main() {
 		}
 	}()
 
-	logger(cfg, "awaiting spotify authentication...")
+	s.Log("awaiting authentication...")
 
 	s.Authenticate()
 	<-s.AuthChan
 
-	logger(cfg, "spotify client authenticated!")
+	s.Log("authenticated!")
 
 	if err := s.PreparePlaylist(cfg); err != nil {
 		log.Fatalf("error preparing playlist: %s", err.Error())
 	}
 
-	logger(cfg, fmt.Sprintf("spotify playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
+	s.Log(fmt.Sprintf("spotify playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
 
 	r, err := reddit.New(cfg, s.MusicChan)
 	if err != nil {
@@ -60,7 +60,7 @@ func main() {
 		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 		go s.Listen()
-		logger(cfg, "spotify worker ready")
+		s.Log("worker ready")
 		go r.Listen()
 		logger(cfg, "reddit worker ready")
 
@@ -70,7 +70,6 @@ func main() {
 		r.Close()
 		logger(cfg, "bye, bye!")
 	}(s, r)
-
 }
 
 func logger(cfg *config.Config, s string) {
