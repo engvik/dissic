@@ -37,7 +37,7 @@ func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
 		Verbose:   cfg.Verbose,
 	}
 
-	c.log("client setup ok")
+	c.Log("client setup ok")
 
 	return &c, nil
 }
@@ -55,29 +55,29 @@ func (c *Client) Prepare() error {
 }
 
 func (c *Client) Listen() {
-	c.log(fmt.Sprintf("watching %d subreddits:", len(c.Config.Subreddits)))
+	c.Log(fmt.Sprintf("watching %d subreddits:", len(c.Config.Subreddits)))
 
 	for _, sub := range c.Config.Subreddits {
-		c.log("\tr/" + sub)
+		c.Log("\tr/" + sub)
 	}
 
 	for {
 		if err := c.Wait(); err != nil {
-			c.log(fmt.Sprintf("reddit/graw error: %s", err.Error()))
+			c.Log(fmt.Sprintf("reddit/graw error: %s", err.Error()))
 		}
 
-		c.log(fmt.Sprintf("restarting reddit worker in %s seconds", c.Retry))
+		c.Log(fmt.Sprintf("restarting reddit worker in %s seconds", c.Retry))
 		time.Sleep(c.Retry * time.Second)
 	}
 }
 
 func (c *Client) Close() {
-	c.log("shutting down")
+	c.Log("shutting down")
 	c.Stop()
 }
 
 func (c *Client) Post(post *reddit.Post) error {
-	c.log(fmt.Sprintf("r/%s: %s (https://reddit.com%s)", post.Subreddit, post.Title, post.Permalink))
+	c.Log(fmt.Sprintf("r/%s: %s (https://reddit.com%s)", post.Subreddit, post.Title, post.Permalink))
 	c.MusicChan <- spotify.Music{
 		Sub:              post.Subreddit,
 		PostTitle:        post.Title,
@@ -88,7 +88,7 @@ func (c *Client) Post(post *reddit.Post) error {
 	return nil
 }
 
-func (c *Client) log(s string) {
+func (c *Client) Log(s string) {
 	if c.Verbose {
 		log.Printf("reddit:\t%s\n", s)
 	}
