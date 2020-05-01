@@ -28,6 +28,11 @@ func main() {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
+	r, err := reddit.New(cfg, s.MusicChan)
+	if err != nil {
+		log.Fatalf("error creating reddit client: %s", err.Error())
+	}
+
 	http.HandleFunc("/spotifyAuth", s.AuthHandler())
 	go func() {
 		if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.HTTPPort), nil); err != nil {
@@ -48,12 +53,7 @@ func main() {
 
 	s.Log(fmt.Sprintf("spotify playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
 
-	r, err := reddit.New(cfg, s.MusicChan)
-	if err != nil {
-		log.Fatalf("error creating reddit client: %s", err.Error())
-	}
-
-	if err := r.Prepare(); err != nil {
+	if err := r.PrepareScanner(); err != nil {
 		log.Fatalf("error preparing reddit/graw scanner: %s", err.Error())
 	}
 
