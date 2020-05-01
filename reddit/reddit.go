@@ -52,12 +52,6 @@ func (c *Client) Prepare() error {
 	c.Wait = wait
 
 	return nil
-	/*
-		defer stop()
-
-
-		return nil
-	*/
 }
 
 func (c *Client) Listen() {
