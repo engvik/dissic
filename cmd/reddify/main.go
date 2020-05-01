@@ -19,7 +19,9 @@ func main() {
 		log.Fatalf("error parsing config: %s", err.Error())
 	}
 
-	logger(cfg, fmt.Sprintf("version: %s", cfg.Version))
+	if cfg.Verbose {
+		log.Printf("reddify %s", cfg.Version)
+	}
 
 	s, err := spotify.New(cfg)
 	if err != nil {
@@ -62,18 +64,15 @@ func main() {
 		go s.Listen()
 		s.Log("worker ready")
 		go r.Listen()
-		logger(cfg, "reddit worker ready")
+		r.Log("worker ready")
 
 		<-shutdown
 
 		s.Close()
 		r.Close()
-		logger(cfg, "bye, bye!")
-	}(s, r)
-}
 
-func logger(cfg *config.Config, s string) {
-	if cfg.Verbose {
-		log.Printf("reddify:\t%s\n", s)
-	}
+		if cfg.Verbose {
+			log.Println("bye, bye!")
+		}
+	}(s, r)
 }
