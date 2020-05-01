@@ -35,25 +35,29 @@ func New(cfg *config.Config) (*Client, error) {
 	c.Auth.SetAuthInfo(cfg.Spotify.ClientID, cfg.Spotify.ClientSecret)
 	c.AuthURL = c.Auth.AuthURL(c.Session)
 
-	if err := browser.OpenURL(c.AuthURL); err != nil {
-		return nil, fmt.Errorf("error opening url: %w", err)
-	}
-
 	c.log("client setup ok")
 
 	return &c, nil
+}
+
+func (c *Client) Authenticate() error {
+	if err := browser.OpenURL(c.AuthURL); err != nil {
+		fmt.Errorf("error opening url: %w", err)
+	}
+
+	return nil
 }
 
 func (c *Client) Listen() {
 	for {
 		select {
 		case m := <-c.MusicChan:
-			go c.Handle(m)
+			go c.handle(m)
 		}
 	}
 }
 
-func (c *Client) Handle(m Music) {
+func (c *Client) handle(m Music) {
 	for _, title := range m.titleStringArray() {
 		if title == "" {
 			continue
