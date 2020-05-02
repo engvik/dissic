@@ -76,6 +76,12 @@ func (c *Client) Listen() {
 
 		c.Log(fmt.Sprintf("restarting reddit worker in %s seconds", c.Retry))
 		time.Sleep(c.Retry * time.Second)
+
+		if err := c.PrepareScanner(); err != nil {
+			c.Log(fmt.Sprintf("error restarting reddit worker: %s", err.Error()))
+			return
+		}
+
 		retryAttempt++
 	}
 }
