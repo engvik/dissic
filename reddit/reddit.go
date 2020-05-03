@@ -3,6 +3,7 @@ package reddit
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/engvik/reddify/config"
@@ -94,7 +95,7 @@ func (c *Client) Close() {
 func (c *Client) Post(post *reddit.Post) error {
 	c.Log(fmt.Sprintf("r/%s: %s (https://reddit.com%s)", post.Subreddit, post.Title, post.Permalink))
 	c.MusicChan <- spotify.Music{
-		Subreddit:        post.Subreddit,
+		Subreddit:        strings.ToLower(post.Subreddit),
 		PostTitle:        post.Title,
 		MediaTitle:       post.Media.OEmbed.Title,
 		SecureMediaTitle: post.SecureMedia.OEmbed.Title,
