@@ -10,8 +10,8 @@ reddit:
     username: "your-username"
     # subreddits to follow
     subreddits:
+        # with and withour r/ prefix is are supported 
         - Music 
-        - r/Music
 
 # spotify config
 spotify:
