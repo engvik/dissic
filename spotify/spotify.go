@@ -21,7 +21,7 @@ type Client struct {
 }
 
 func New(cfg *config.Config) (*Client, error) {
-	callbackURL := fmt.Sprintf("http://localhost:%s/spotifyAuth", cfg.HTTPPort)
+	callbackURL := fmt.Sprintf("http://localhost:%d/spotifyAuth", cfg.HTTPPort)
 	auth := spotify.NewAuthenticator(callbackURL, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistModifyPrivate, spotify.ScopePlaylistModifyPublic)
 
 	c := Client{

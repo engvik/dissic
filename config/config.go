@@ -2,72 +2,63 @@ package config
 
 import (
 	"errors"
-	"flag"
 	"fmt"
-	"strings"
+	"io/ioutil"
+	"os"
+
+	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/yaml.v2"
 )
 
 const version = "0.0.1"
 
+type environment struct {
+	RedditUsername      string `envconfig:"REDDIT_USERNAME"`
+	SpotifyClientID     string `envconfig:"SPOTIFY_CLIENT_ID"`
+	SpotifyClientSecret string `envconfig:"SPOTIFY_CLIENT_SECRET"`
+}
+
 type Config struct {
-	Reddit   Reddit
-	Spotify  Spotify
+	Reddit   Reddit  `yaml:"reddit"`
+	Spotify  Spotify `yaml:"spotify"`
+	HTTPPort int     `yaml:"http-port"`
+	Verbose  bool    `yaml:"verbose"`
 	Version  string
-	HTTPPort string
-	Verbose  bool
 }
 
 type Reddit struct {
-	Username string
-	Subs     []string
+	Username string   `yaml:"username"`
+	Subs     []string `yaml:"subreddits"`
 }
 
 type Spotify struct {
-	ClientID     string
-	ClientSecret string
-	PlaylistName string
-	PlaylistID   string
+	ClientID     string `yaml:"client-id"`
+	ClientSecret string `yaml:"client-secret"`
+	PlaylistName string `yaml:"playlist-name"`
+	PlaylistID   string `yaml:"playlist-id"`
 }
 
-func Parse() (*Config, error) {
-	var redditUsername string
-	var redditSubs string
-	var spotifyClientID string
-	var spotifyClientSecret string
-	var spotifyPlaylistName string
-	var spotifyPlaylistID string
-	var HTTPPort string
-	var verbose bool
-
-	flag.StringVar(&redditUsername, "reddit-username", "", "reddit username")
-	flag.StringVar(&redditSubs, "subreddits", "", "list of subreddits to listen to")
-	flag.StringVar(&spotifyClientID, "spotify-client-id", "", "spotify client id")
-	flag.StringVar(&spotifyClientSecret, "spotify-client-secret", "", "spotify client secret")
-	flag.StringVar(&spotifyPlaylistName, "spotify-playlist-name", "", "spotify playlist name to add music to")
-	flag.StringVar(&spotifyPlaylistID, "spotify-playlist-id", "", "spotify playlist id to add music to")
-	flag.StringVar(&HTTPPort, "http-port", "8080", "http port")
-	flag.BoolVar(&verbose, "verbose", false, "verbose log output")
-
-	flag.Parse()
-
-	cfg := Config{
-		Reddit: Reddit{
-			Username: redditUsername,
-			Subs:     strings.Split(redditSubs, ","),
-		},
-		Spotify: Spotify{
-			ClientID:     spotifyClientID,
-			ClientSecret: spotifyClientSecret,
-			PlaylistName: spotifyPlaylistName,
-			PlaylistID:   spotifyPlaylistID,
-		},
-		Version:  version,
-		HTTPPort: HTTPPort,
-		Verbose:  verbose,
+func Load() (*Config, error) {
+	cf, err := readConfigFile()
+	if err != nil {
+		return nil, fmt.Errorf("reading config file: %w", err)
 	}
 
-	err := cfg.validate()
-	if err != nil {
+	var cfg Config
+	if err := yaml.Unmarshal(cf, &cfg); err != nil {
+		return nil, fmt.Errorf("unmarshal yaml file: %w", err)
+	}
+
+	var env environment
+	if err := envconfig.Process("reddify", &env); err != nil {
+		return nil, fmt.Errorf("parsing environment variables: %w", err)
+	}
+
+	cfg.addEnvironment(env)
+
+	cfg.Version = version
+
+	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
 
@@ -76,6 +67,20 @@ func Parse() (*Config, error) {
 
 func (c *Config) GetRedditUserAgent() string {
 	return fmt.Sprintf("graw:reddify:%s by /u/%s", c.Version, c.Reddit.Username)
+}
+
+func (c *Config) addEnvironment(e environment) {
+	if c.Reddit.Username == "" {
+		c.Reddit.Username = e.RedditUsername
+	}
+
+	if c.Spotify.ClientID == "" {
+		c.Spotify.ClientID = e.SpotifyClientID
+	}
+
+	if c.Spotify.ClientSecret == "" {
+		c.Spotify.ClientSecret = e.SpotifyClientSecret
+	}
 }
 
 func (c *Config) validate() error {
@@ -100,4 +105,18 @@ func (c *Config) validate() error {
 	}
 
 	return nil
+}
+
+func readConfigFile() ([]byte, error) {
+	path, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("error getting path: %w", err)
+	}
+
+	data, err := ioutil.ReadFile(fmt.Sprintf("%s/config.yaml", path))
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %w", err)
+	}
+
+	return data, nil
 }

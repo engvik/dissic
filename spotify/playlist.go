@@ -25,7 +25,7 @@ func (c *Client) PreparePlaylist(cfg *config.Config) error {
 	}
 
 	if playlist == nil {
-		return errors.New("unable to get spotify playlist")
+		return errors.New("unable to get playlist")
 	}
 
 	c.Playlist = playlist

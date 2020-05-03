@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Parse command line arguments into a config struct
-	cfg, err := config.Parse()
+	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("error parsing config: %s", err.Error())
 	}
@@ -39,7 +39,7 @@ func main() {
 	// Set up a very basic http server to handle auth callbacks
 	http.HandleFunc("/spotifyAuth", s.AuthHandler())
 	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.HTTPPort), nil); err != nil {
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.HTTPPort), nil); err != nil {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
 	}()
@@ -57,7 +57,7 @@ func main() {
 		log.Fatalf("error preparing playlist: %s", err.Error())
 	}
 
-	s.Log(fmt.Sprintf("spotify playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
+	s.Log(fmt.Sprintf("playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
 
 	// Prepare the reddit scanner
 	if err := r.PrepareScanner(); err != nil {
