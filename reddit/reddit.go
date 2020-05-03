@@ -28,7 +28,7 @@ func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
 		return nil, fmt.Errorf("new script: %w", err)
 	}
 
-	gCfg := graw.Config{Subreddits: cleanSubNames(cfg.Reddit.Subs)}
+	gCfg := graw.Config{Subreddits: cleanSubNames(cfg.Reddit.Subreddits)}
 
 	c := Client{
 		Config:           gCfg,
@@ -94,7 +94,7 @@ func (c *Client) Close() {
 func (c *Client) Post(post *reddit.Post) error {
 	c.Log(fmt.Sprintf("r/%s: %s (https://reddit.com%s)", post.Subreddit, post.Title, post.Permalink))
 	c.MusicChan <- spotify.Music{
-		Sub:              post.Subreddit,
+		Subreddit:        post.Subreddit,
 		PostTitle:        post.Title,
 		MediaTitle:       post.Media.OEmbed.Title,
 		SecureMediaTitle: post.SecureMedia.OEmbed.Title,

@@ -1,7 +1,7 @@
 package spotify
 
 type Music struct {
-	Sub              string
+	Subreddit        string
 	PostTitle        string
 	MediaTitle       string
 	SecureMediaTitle string

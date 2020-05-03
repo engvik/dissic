@@ -10,25 +10,39 @@ import (
 
 const ErrInvalidID = "Invalid playlist Id"
 
-func (c *Client) PreparePlaylist(cfg *config.Config) error {
-	var playlist *spotify.FullPlaylist
-	var err error
-
-	if cfg.Spotify.PlaylistID != "" {
-		playlist, err = c.preparePlaylistByID(cfg.Spotify.PlaylistID)
-	} else if cfg.Spotify.PlaylistName != "" {
-		playlist, err = c.preparePlaylistByName(cfg.Spotify.PlaylistName)
-	}
-
+func (c *Client) PreparePlaylists(cfg *config.Config) error {
+	spm := make(map[string]spotify.ID, len(cfg.Reddit.Subreddits))
+	user, err := c.C.CurrentUser()
 	if err != nil {
-		return fmt.Errorf("error getting playlist: %w", err)
+		return fmt.Errorf("error getting current user: %w", err)
 	}
 
-	if playlist == nil {
-		return errors.New("unable to get playlist")
+	c.Log(fmt.Sprintf("retrived user: %s", user.ID))
+
+	for _, p := range cfg.Playlists {
+		var playlist *spotify.FullPlaylist
+		var err error
+
+		if p.ID != "" {
+			playlist, err = c.preparePlaylistByID(p.ID)
+		} else if p.Name != "" {
+			playlist, err = c.preparePlaylistByName(user, p.Name)
+		}
+
+		if err != nil {
+			return fmt.Errorf("preparing playlist: %w", err)
+		}
+
+		if playlist == nil {
+			return errors.New("unable to get playlist")
+		}
+
+		for _, s := range p.Subreddits {
+			spm[s] = playlist.ID
+		}
 	}
 
-	c.Playlist = playlist
+	c.SubredditPlaylist = spm
 
 	return nil
 }
@@ -44,14 +58,7 @@ func (c *Client) preparePlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 	return playlist, nil
 }
 
-func (c *Client) preparePlaylistByName(name string) (*spotify.FullPlaylist, error) {
-	user, err := c.C.CurrentUser()
-	if err != nil {
-		return nil, fmt.Errorf("error getting current user: %w", err)
-	}
-
-	c.Log(fmt.Sprintf("retrived user: %s", user.ID))
-
+func (c *Client) preparePlaylistByName(user *spotify.PrivateUser, name string) (*spotify.FullPlaylist, error) {
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
@@ -84,12 +91,12 @@ func (c *Client) preparePlaylistByName(name string) (*spotify.FullPlaylist, erro
 	return playlist, nil
 }
 
-func (c *Client) addToPlaylist(ID spotify.ID) error {
-	snapshotID, err := c.C.AddTracksToPlaylist(c.Playlist.ID, ID)
+func (c *Client) addToPlaylist(playlistID spotify.ID, trackID spotify.ID) error {
+	snapshotID, err := c.C.AddTracksToPlaylist(playlistID, trackID)
 	if err != nil {
-		return fmt.Errorf("error adding track to playlist %s: %w", ID, err)
+		return fmt.Errorf("adding track: playlist %s, track %s: %w", playlistID, trackID, err)
 	}
 
-	c.Log(fmt.Sprintf("\tadded track to playlist, snapshot id: %s", snapshotID))
+	c.Log(fmt.Sprintf("\tadded track to playlist %s, snapshot id: %s", playlistID, snapshotID))
 	return nil
 }
