@@ -28,7 +28,7 @@ func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
 		return nil, fmt.Errorf("new script: %w", err)
 	}
 
-	gCfg := graw.Config{Subreddits: cleanSubNames(cfg.Reddit.Subs)}
+	gCfg := graw.Config{Subreddits: cleanSubNames(cfg.Reddit.Subreddits)}
 
 	c := Client{
 		Config:           gCfg,
