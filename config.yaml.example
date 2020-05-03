@@ -8,10 +8,6 @@ http-port: 8080
 reddit:
     # username
     username: "your-username"
-    # subreddits to follow
-    subreddits:
-        # with and withour r/ prefix is are supported 
-        - Music 
 
 # spotify config
 spotify:
@@ -21,6 +17,21 @@ spotify:
     client-secret: "your-client-secret"
     # the id for the playlist to add tracks to
     playlist-id: ""
-    # or playlist name, playlist will be created if it doesn't exist
     #  playlist-name: "reddify"
+
+
+# define your spotify playlists
+playlists:
+    -
+        # playlist name, playlist will be created if it doesn't exist
+        name: "playlist-one"
+        # subreddits to follow
+        subreddits:
+            # with and withour r/ prefix is are supported 
+            - Music 
+    -
+        # supports using spotify playlist id 
+        id: "spotify-id-for-playlist-two"
+        subreddits:
+            - r/Music
 
