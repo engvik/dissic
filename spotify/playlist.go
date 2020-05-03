@@ -15,7 +15,7 @@ func (c *Client) GetPlaylists(cfg *config.Config) error {
 	spm := make(map[string]spotify.ID, len(cfg.Reddit.Subreddits))
 	user, err := c.C.CurrentUser()
 	if err != nil {
-		return fmt.Errorf("error getting current user: %w", err)
+		return fmt.Errorf("getting current user: %w", err)
 	}
 
 	c.Log(fmt.Sprintf("retrived user: %s", user.ID))
@@ -54,7 +54,7 @@ func (c *Client) GetPlaylists(cfg *config.Config) error {
 func (c *Client) getPlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 	playlist, err := c.C.GetPlaylist(spotify.ID(ID))
 	if err != nil {
-		return nil, fmt.Errorf("error getting playlist %s: %w", ID, err)
+		return nil, fmt.Errorf("getting playlist %s: %w", ID, err)
 	}
 
 	c.Log(fmt.Sprintf("found playlist: %s (%s)", playlist.Name, playlist.ID))
@@ -65,7 +65,7 @@ func (c *Client) getPlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 func (c *Client) getPlaylistByName(user *spotify.PrivateUser, name string) (*spotify.FullPlaylist, error) {
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
-		return nil, fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
+		return nil, fmt.Errorf("getting playlists for %s: %w", user.ID, err)
 	}
 
 	var playlist *spotify.FullPlaylist
@@ -74,7 +74,7 @@ func (c *Client) getPlaylistByName(user *spotify.PrivateUser, name string) (*spo
 		if p.Name == name {
 			playlist, err = c.C.GetPlaylist(p.ID)
 			if err != nil {
-				return nil, fmt.Errorf("error getting playlist %s (%s): %w", p.Name, p.ID, err)
+				return nil, fmt.Errorf("getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
 
 			c.Log(fmt.Sprintf("found playlist: %s (%s)", p.Name, p.ID))
@@ -86,7 +86,7 @@ func (c *Client) getPlaylistByName(user *spotify.PrivateUser, name string) (*spo
 	if playlist == nil {
 		playlist, err = c.C.CreatePlaylistForUser(user.ID, name, "reddify", false)
 		if err != nil {
-			return nil, fmt.Errorf("error creating playlist %s: %w", name, err)
+			return nil, fmt.Errorf("creating playlist %s: %w", name, err)
 		}
 
 		c.Log(fmt.Sprintf("created playlist: %s", name))

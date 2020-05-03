@@ -42,7 +42,7 @@ func New(cfg *config.Config) (*Client, error) {
 
 func (c *Client) Authenticate() error {
 	if err := browser.OpenURL(c.AuthURL); err != nil {
-		fmt.Errorf("error opening url: %w", err)
+		return fmt.Errorf("opening url (%s): %w", c.AuthURL, err)
 	}
 
 	return nil
@@ -65,7 +65,7 @@ func (c *Client) handle(m Music) {
 
 		track, err := c.getTrack(title)
 		if err != nil {
-			c.Log(fmt.Sprintf("\terror getting track: %s", err.Error()))
+			c.Log(fmt.Sprintf("\tget track: %s", err.Error()))
 			continue
 		}
 
@@ -75,7 +75,7 @@ func (c *Client) handle(m Music) {
 		}
 
 		if err := c.addToPlaylist(playlist, track.ID); err != nil {
-			c.Log(fmt.Sprintf("\terror adding track to playlist: %s", err.Error()))
+			c.Log(fmt.Sprintf("\teadding track to playlist: %s", err.Error()))
 		}
 
 		return
