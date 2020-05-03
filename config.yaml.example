@@ -1,0 +1,26 @@
+# Verbose log output
+verbose: true
+
+# HTTP port
+http-port: 8080
+
+# reddit config
+reddit:
+    # username
+    username: "your-username"
+    # subreddits to follow
+    subreddits:
+        - Music 
+        - r/Music
+
+# spotify config
+spotify:
+    # client id
+    client-id: "your-client-id"
+    # client secret
+    client-secret: "your-client-secret"
+    # the id for the playlist to add tracks to
+    playlist-id: ""
+    # or playlist name, playlist will be created if it doesn't exist
+    #  playlist-name: "reddify"
+
