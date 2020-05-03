@@ -50,8 +50,8 @@ func main() {
 	<-s.AuthChan
 	s.Log("authenticated!")
 
-	// Prepare the Spotify playlist
-	if err := s.PreparePlaylists(cfg); err != nil {
+	// Get Spotify playlists
+	if err := s.GetPlaylists(cfg); err != nil {
 		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
 

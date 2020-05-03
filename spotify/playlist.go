@@ -3,6 +3,7 @@ package spotify
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/engvik/reddify/config"
 	"github.com/zmb3/spotify"
@@ -10,7 +11,7 @@ import (
 
 const ErrInvalidID = "Invalid playlist Id"
 
-func (c *Client) PreparePlaylists(cfg *config.Config) error {
+func (c *Client) GetPlaylists(cfg *config.Config) error {
 	spm := make(map[string]spotify.ID, len(cfg.Reddit.Subreddits))
 	user, err := c.C.CurrentUser()
 	if err != nil {
@@ -24,9 +25,9 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 		var err error
 
 		if p.ID != "" {
-			playlist, err = c.preparePlaylistByID(p.ID)
+			playlist, err = c.getPlaylistByID(p.ID)
 		} else if p.Name != "" {
-			playlist, err = c.preparePlaylistByName(user, p.Name)
+			playlist, err = c.getPlaylistByName(user, p.Name)
 		}
 
 		if err != nil {
@@ -40,6 +41,9 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 		for _, s := range p.Subreddits {
 			spm[s] = playlist.ID
 		}
+
+		// Be nice to the Spotify API
+		time.Sleep(1 * time.Second)
 	}
 
 	c.SubredditPlaylist = spm
@@ -47,7 +51,7 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 	return nil
 }
 
-func (c *Client) preparePlaylistByID(ID string) (*spotify.FullPlaylist, error) {
+func (c *Client) getPlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 	playlist, err := c.C.GetPlaylist(spotify.ID(ID))
 	if err != nil {
 		return nil, fmt.Errorf("error getting playlist %s: %w", ID, err)
@@ -58,7 +62,7 @@ func (c *Client) preparePlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 	return playlist, nil
 }
 
-func (c *Client) preparePlaylistByName(user *spotify.PrivateUser, name string) (*spotify.FullPlaylist, error) {
+func (c *Client) getPlaylistByName(user *spotify.PrivateUser, name string) (*spotify.FullPlaylist, error) {
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
