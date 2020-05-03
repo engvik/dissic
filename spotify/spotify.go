@@ -10,14 +10,14 @@ import (
 )
 
 type Client struct {
-	Auth      spotify.Authenticator
-	AuthURL   string
-	Session   string
-	AuthChan  chan bool
-	MusicChan chan Music
-	Playlist  *spotify.FullPlaylist
-	C         spotify.Client
-	Verbose   bool
+	Auth              spotify.Authenticator
+	AuthURL           string
+	Session           string
+	AuthChan          chan bool
+	MusicChan         chan Music
+	C                 spotify.Client
+	SubredditPlaylist map[string]spotify.ID
+	Verbose           bool
 }
 
 func New(cfg *config.Config) (*Client, error) {
@@ -69,7 +69,12 @@ func (c *Client) handle(m Music) {
 			continue
 		}
 
-		if err := c.addToPlaylist(track.ID); err != nil {
+		playlist, ok := c.SubredditPlaylist[m.Subreddit]
+		if !ok {
+			c.Log(fmt.Sprintf("no playlist found for subreddit: %s", m.Subreddit))
+		}
+
+		if err := c.addToPlaylist(playlist, track.ID); err != nil {
 			c.Log(fmt.Sprintf("\terror adding track to playlist: %s", err.Error()))
 		}
 

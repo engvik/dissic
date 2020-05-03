@@ -46,18 +46,14 @@ func main() {
 
 	// Authenticate spotify
 	s.Log("awaiting authentication...")
-
 	s.Authenticate()
 	<-s.AuthChan
-
 	s.Log("authenticated!")
 
 	// Prepare the Spotify playlist
-	if err := s.PreparePlaylist(cfg); err != nil {
-		log.Fatalf("error preparing playlist: %s", err.Error())
+	if err := s.PreparePlaylists(cfg); err != nil {
+		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
-
-	s.Log(fmt.Sprintf("playlist ready: %s (%s)", s.Playlist.Name, s.Playlist.ID))
 
 	// Prepare the reddit scanner
 	if err := r.PrepareScanner(); err != nil {
