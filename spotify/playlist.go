@@ -3,6 +3,7 @@ package spotify
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/engvik/reddify/config"
@@ -39,7 +40,8 @@ func (c *Client) GetPlaylists(cfg *config.Config) error {
 		}
 
 		for _, s := range p.Subreddits {
-			spm[s] = playlist.ID
+			subreddit := strings.ToLower(s)
+			spm[subreddit] = playlist.ID
 		}
 
 		// Be nice to the Spotify API
