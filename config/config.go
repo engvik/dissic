@@ -130,12 +130,12 @@ func (c *Config) validate() error {
 func readConfigFile() ([]byte, error) {
 	path, err := os.Getwd()
 	if err != nil {
-		return nil, fmt.Errorf("error getting path: %w", err)
+		return nil, fmt.Errorf("get working directory: %w", err)
 	}
 
 	data, err := ioutil.ReadFile(fmt.Sprintf("%s/config.yaml", path))
 	if err != nil {
-		return nil, fmt.Errorf("error reading file: %w", err)
+		return nil, fmt.Errorf("reading file: %w", err)
 	}
 
 	return data, nil

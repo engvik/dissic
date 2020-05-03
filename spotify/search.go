@@ -21,7 +21,7 @@ func (c *Client) getTrack(title string) (spotify.FullTrack, error) {
 
 	res, err := c.search(sq)
 	if err != nil {
-		return track, fmt.Errorf("error searching: %w", err)
+		return track, fmt.Errorf("searching: %w", err)
 	}
 
 	cmprTitle := strings.ToLower(title)
@@ -69,10 +69,5 @@ func (c *Client) createSearchQuery(t string) (string, error) {
 }
 
 func (c *Client) search(q string) (*spotify.SearchResult, error) {
-	res, err := c.C.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
-	if err != nil {
-		return nil, fmt.Errorf("error searching: %w", err)
-	}
-
-	return res, nil
+	return c.C.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 }
