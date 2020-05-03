@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
@@ -19,16 +20,17 @@ type environment struct {
 }
 
 type Config struct {
-	Reddit   Reddit  `yaml:"reddit"`
-	Spotify  Spotify `yaml:"spotify"`
-	HTTPPort int     `yaml:"http-port"`
-	Verbose  bool    `yaml:"verbose"`
-	Version  string
+	Reddit    Reddit     `yaml:"reddit"`
+	Spotify   Spotify    `yaml:"spotify"`
+	Playlists []Playlist `yaml:"playlists"`
+	HTTPPort  int        `yaml:"http-port"`
+	Verbose   bool       `yaml:"verbose"`
+	Version   string
 }
 
 type Reddit struct {
-	Username string   `yaml:"username"`
-	Subs     []string `yaml:"subreddits"`
+	Username   string `yaml:"username"`
+	Subreddits []string
 }
 
 type Spotify struct {
@@ -36,6 +38,11 @@ type Spotify struct {
 	ClientSecret string `yaml:"client-secret"`
 	PlaylistName string `yaml:"playlist-name"`
 	PlaylistID   string `yaml:"playlist-id"`
+}
+
+type Playlist struct {
+	Name        string   `yaml:"name"`
+	Subsreddits []string `yaml:"subreddits"`
 }
 
 func Load() (*Config, error) {
@@ -49,6 +56,8 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("unmarshal yaml file: %w", err)
 	}
 
+	log.Println(cfg)
+
 	var env environment
 	if err := envconfig.Process("reddify", &env); err != nil {
 		return nil, fmt.Errorf("parsing environment variables: %w", err)
@@ -57,6 +66,7 @@ func Load() (*Config, error) {
 	cfg.addEnvironment(env)
 
 	cfg.Version = version
+	cfg.Reddit.Subreddits = cfg.getSubreddits()
 
 	if err := cfg.validate(); err != nil {
 		return nil, err
@@ -67,6 +77,18 @@ func Load() (*Config, error) {
 
 func (c *Config) GetRedditUserAgent() string {
 	return fmt.Sprintf("graw:reddify:%s by /u/%s", c.Version, c.Reddit.Username)
+}
+
+func (c *Config) getSubreddits() []string {
+	var subs []string
+
+	for _, p := range c.Playlists {
+		for _, sub := range p.Subsreddits {
+			subs = append(subs, sub)
+		}
+	}
+
+	return subs
 }
 
 func (c *Config) addEnvironment(e environment) {
@@ -88,7 +110,7 @@ func (c *Config) validate() error {
 		return errors.New("reddit username is missing (--reddit-username)")
 	}
 
-	if len(c.Reddit.Subs) <= 0 {
+	if len(c.Reddit.Subreddits) <= 0 {
 		return errors.New("no subreddits passed (--subreddits=a,b,c)")
 	}
 
