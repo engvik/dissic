@@ -17,6 +17,8 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 		return fmt.Errorf("error getting current user: %w", err)
 	}
 
+	c.Log(fmt.Sprintf("retrived user: %s", user.ID))
+
 	for _, p := range cfg.Playlists {
 		var playlist *spotify.FullPlaylist
 		var err error
@@ -57,8 +59,6 @@ func (c *Client) preparePlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 }
 
 func (c *Client) preparePlaylistByName(user *spotify.PrivateUser, name string) (*spotify.FullPlaylist, error) {
-	c.Log(fmt.Sprintf("retrived user: %s", user.ID))
-
 	res, err := c.C.GetPlaylistsForUser(user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting playlists for %s: %w", user.ID, err)
