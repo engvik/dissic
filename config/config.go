@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
@@ -41,8 +40,9 @@ type Spotify struct {
 }
 
 type Playlist struct {
-	Name        string   `yaml:"name"`
-	Subsreddits []string `yaml:"subreddits"`
+	Name       string   `yaml:"name"`
+	ID         string   `yaml:"id"`
+	Subreddits []string `yaml:"subreddits"`
 }
 
 func Load() (*Config, error) {
@@ -55,8 +55,6 @@ func Load() (*Config, error) {
 	if err := yaml.Unmarshal(cf, &cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal yaml file: %w", err)
 	}
-
-	log.Println(cfg)
 
 	var env environment
 	if err := envconfig.Process("reddify", &env); err != nil {
@@ -83,7 +81,7 @@ func (c *Config) getSubreddits() []string {
 	var subs []string
 
 	for _, p := range c.Playlists {
-		for _, sub := range p.Subsreddits {
+		for _, sub := range p.Subreddits {
 			subs = append(subs, sub)
 		}
 	}
