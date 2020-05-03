@@ -97,6 +97,6 @@ func (c *Client) addToPlaylist(playlistID spotify.ID, trackID spotify.ID) error 
 		return fmt.Errorf("adding track: playlist %s, track %s: %w", playlistID, trackID, err)
 	}
 
-	c.Log(fmt.Sprintf("\tadded track to playlist, snapshot id: %s", snapshotID))
+	c.Log(fmt.Sprintf("\tadded track to playlist %s, snapshot id: %s", playlistID, snapshotID))
 	return nil
 }
