@@ -67,7 +67,7 @@ func main() {
 
 		go s.Listen()
 		s.Log("worker ready")
-		go r.Listen()
+		go r.Listen(shutdown)
 		r.Log("worker ready")
 
 		<-shutdown
