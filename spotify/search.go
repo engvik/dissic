@@ -48,7 +48,7 @@ func (c *Client) createSearchQuery(t string) (string, error) {
 	title = strings.ReplaceAll(title, "\"", "")
 
 	var splitTitle []string
-	separators := []string{"-", "~", "|", "by"}
+	separators := []string{"-", "~", "|", "by", "--"}
 
 	for _, s := range separators {
 		splitTitle = strings.Split(title, fmt.Sprintf(" %s ", s))
