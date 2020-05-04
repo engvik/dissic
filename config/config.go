@@ -35,8 +35,6 @@ type Reddit struct {
 type Spotify struct {
 	ClientID     string `yaml:"client-id"`
 	ClientSecret string `yaml:"client-secret"`
-	PlaylistName string `yaml:"playlist-name"`
-	PlaylistID   string `yaml:"playlist-id"`
 }
 
 type Playlist struct {
@@ -105,23 +103,25 @@ func (c *Config) addEnvironment(e environment) {
 
 func (c *Config) validate() error {
 	if c.Reddit.Username == "" {
-		return errors.New("reddit username is missing (--reddit-username)")
+		return errors.New("reddit username is missing")
 	}
 
 	if len(c.Reddit.Subreddits) <= 0 {
-		return errors.New("no subreddits passed (--subreddits=a,b,c)")
+		return errors.New("no subreddits passed")
 	}
 
 	if c.Spotify.ClientID == "" {
-		return errors.New("spotify client id is missing (--spotify-client-id)")
+		return errors.New("spotify client id is missing")
 	}
 
 	if c.Spotify.ClientSecret == "" {
-		return errors.New("spotify client secret is missing (--spotify-client-secret)")
+		return errors.New("spotify client secret is missing")
 	}
 
-	if c.Spotify.PlaylistName == "" && c.Spotify.PlaylistID == "" {
-		return errors.New("no spotify playlist specified (--spotify-playlist-name or --spotify-playlist-id)")
+	for i, p := range c.Playlists {
+		if p.ID == "" && p.Name == "" {
+			return errors.New(fmt.Sprintf("playlist number %d is missing ID or name", i))
+		}
 	}
 
 	return nil
