@@ -28,8 +28,10 @@ type Config struct {
 }
 
 type Reddit struct {
-	Username   string `yaml:"username"`
-	Subreddits []string
+	Username             string `yaml:"username"`
+	MaxRetryAttempts     int    `yaml:"max-retry-attempts"`
+	RetryAttemptWaitTime int    `yaml:"retry-attempt-wait-time"`
+	Subreddits           []string
 }
 
 type Spotify struct {
@@ -60,9 +62,7 @@ func Load() (*Config, error) {
 	}
 
 	cfg.addEnvironment(env)
-
-	cfg.Version = version
-	cfg.Reddit.Subreddits = cfg.getSubreddits()
+	cfg.setDefaultValues()
 
 	if err := cfg.validate(); err != nil {
 		return nil, err
@@ -125,6 +125,19 @@ func (c *Config) validate() error {
 	}
 
 	return nil
+}
+
+func (c *Config) setDefaultValues() {
+	c.Version = version
+	c.Reddit.Subreddits = c.getSubreddits()
+
+	if c.Reddit.MaxRetryAttempts == 0 {
+		c.Reddit.MaxRetryAttempts = 10
+	}
+
+	if c.Reddit.RetryAttemptWaitTime == 0 {
+		c.Reddit.RetryAttemptWaitTime = 10
+	}
 }
 
 func readConfigFile() ([]byte, error) {

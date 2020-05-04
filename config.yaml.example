@@ -8,6 +8,10 @@ http-port: 8080
 reddit:
     # username
     username: "your-username"
+    # maximum amount of times attempt reconnection if connection is suddenly lost
+    max-retry-attempts: 10
+    # number of seconds to wait before each retry attempt
+    retry-attempt-wait-time: 10
 
 # spotify config
 spotify:
