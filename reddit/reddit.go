@@ -13,14 +13,14 @@ import (
 )
 
 type Client struct {
-	Config           graw.Config
-	Script           reddit.Script
-	MusicChan        chan spotify.Music
-	Retry            time.Duration
-	MaxRetryAttempts int
-	Stop             func()
-	Wait             func() error
-	Verbose          bool
+	Config               graw.Config
+	Script               reddit.Script
+	MusicChan            chan spotify.Music
+	RetryAttemptWaitTime time.Duration
+	MaxRetryAttempts     int
+	Stop                 func()
+	Wait                 func() error
+	Verbose              bool
 }
 
 func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
@@ -32,12 +32,12 @@ func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
 	gCfg := graw.Config{Subreddits: cleanSubNames(cfg.Reddit.Subreddits)}
 
 	c := Client{
-		Config:           gCfg,
-		Script:           s,
-		MusicChan:        m,
-		Retry:            time.Duration(10), // TODO: make configurable
-		MaxRetryAttempts: 10,                // TODO: make configurable
-		Verbose:          cfg.Verbose,
+		Config:               gCfg,
+		Script:               s,
+		MusicChan:            m,
+		RetryAttemptWaitTime: time.Duration(cfg.Reddit.MaxRetryAttempts),
+		MaxRetryAttempts:     cfg.Reddit.MaxRetryAttempts,
+		Verbose:              cfg.Verbose,
 	}
 
 	c.Log("client setup ok")
@@ -75,12 +75,11 @@ func (c *Client) Listen() {
 			c.Log(fmt.Sprintf("reddit/graw error: %s", err.Error()))
 		}
 
-		c.Log(fmt.Sprintf("restarting reddit worker in %s seconds", c.Retry))
-		time.Sleep(c.Retry * time.Second)
+		c.Log(fmt.Sprintf("restarting reddit worker in %s seconds", c.RetryAttemptWaitTime))
+		time.Sleep(c.RetryAttemptWaitTime * time.Second)
 
 		if err := c.PrepareScanner(); err != nil {
 			c.Log(fmt.Sprintf("error restarting reddit worker: %s", err.Error()))
-			return
 		}
 
 		retryAttempt++
