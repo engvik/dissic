@@ -3,6 +3,7 @@ package reddit
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -57,7 +58,7 @@ func (c *Client) PrepareScanner() error {
 	return nil
 }
 
-func (c *Client) Listen() {
+func (c *Client) Listen(shutdown chan<- os.Signal) {
 	c.Log(fmt.Sprintf("watching %d subreddits:", len(c.Config.Subreddits)))
 
 	for _, sub := range c.Config.Subreddits {
@@ -68,10 +69,12 @@ func (c *Client) Listen() {
 
 	for {
 		if retryAttempt == c.MaxRetryAttempts {
-			return
+			c.Log(fmt.Sprintf("hit maximum retry attempts %d - quitting", retryAttempt))
+			shutdown <- os.Interrupt
 		}
 
 		if err := c.Wait(); err != nil {
+			retryAttempt = 0
 			c.Log(fmt.Sprintf("reddit/graw error: %s", err.Error()))
 		}
 
