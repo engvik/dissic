@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// Parse command line arguments into a config struct
+	// Load config from config file and environment
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("error parsing config: %s", err.Error())
