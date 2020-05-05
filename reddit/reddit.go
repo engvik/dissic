@@ -16,7 +16,7 @@ import (
 type Client struct {
 	Config               graw.Config
 	Script               reddit.Script
-	MusicChan            chan spotify.Music
+	MusicChan            chan<- spotify.Music
 	RetryAttemptWaitTime time.Duration
 	MaxRetryAttempts     int
 	Stop                 func()
@@ -24,7 +24,7 @@ type Client struct {
 	Verbose              bool
 }
 
-func New(cfg *config.Config, m chan spotify.Music) (*Client, error) {
+func New(cfg *config.Config, m chan<- spotify.Music) (*Client, error) {
 	s, err := reddit.NewScript(cfg.GetRedditUserAgent(), 5*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("new script: %w", err)
