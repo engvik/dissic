@@ -15,14 +15,10 @@ reddit:
 
 # spotify config
 spotify:
-    # client id
+    # client id (or set SPOTIFY_CLIENT_ID)
     client-id: "your-client-id"
-    # client secret
+    # client secret (or set SPOTIFY_CLIENT_SECRET)
     client-secret: "your-client-secret"
-    # the id for the playlist to add tracks to
-    playlist-id: ""
-    #  playlist-name: "reddify"
-
 
 # define your spotify playlists
 playlists:
