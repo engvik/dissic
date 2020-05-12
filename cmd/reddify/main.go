@@ -39,56 +39,73 @@ func main() {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
+	// Set up http server
 	mux := http.NewServeMux()
 	mux.HandleFunc("/spotifyAuth", s.AuthHandler())
-	httpServer := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.HTTPPort),
-		Handler: mux,
+	rdfy := reddify{
+		config:  cfg,
+		spotify: s,
+		reddit:  r,
+		http: &http.Server{
+			Addr:    fmt.Sprintf(":%d", cfg.HTTPPort),
+			Handler: mux,
+		},
 	}
 
+	rdfy.start(ctx)
+}
+
+type reddify struct {
+	config  *config.Config
+	spotify *spotify.Client
+	reddit  *reddit.Client
+	http    *http.Server
+}
+
+func (r *reddify) start(ctx context.Context) {
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != nil {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
-	}(httpServer)
+	}(r.http)
 
 	// Authenticate spotify
-	s.Log("awaiting authentication...")
-	s.Authenticate()
-	<-s.AuthChan
-	s.Log("authenticated!")
+	r.spotify.Log("awaiting authentication...")
+	r.spotify.Authenticate()
+	<-r.spotify.AuthChan
+	r.spotify.Log("authenticated!")
 
 	// Get Spotify playlists
-	if err := s.GetPlaylists(cfg); err != nil {
+	if err := r.spotify.GetPlaylists(r.config); err != nil {
 		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
 
 	// Prepare the reddit scanner
-	if err := r.PrepareScanner(); err != nil {
+	if err := r.reddit.PrepareScanner(); err != nil {
 		log.Fatalf("error preparing reddit/graw scanner: %s", err.Error())
 	}
 
 	// Start listening and block until shutdown signal receieved
-	func(ctx context.Context, s *spotify.Client, r *reddit.Client, h *http.Server) {
+	func(ctx context.Context, r *reddify) {
 		shutdown := make(chan os.Signal, 1)
 		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
-		go s.Listen()
-		s.Log("worker ready")
-		go r.Listen(shutdown)
-		r.Log("worker ready")
+		go r.spotify.Listen()
+		r.spotify.Log("worker ready")
+		go r.reddit.Listen(shutdown)
+		r.reddit.Log("worker ready")
 
 		<-shutdown
 
-		s.Close()
-		r.Close()
+		r.spotify.Close()
+		r.reddit.Close()
 
-		if err := h.Shutdown(ctx); err != nil {
+		if err := r.http.Shutdown(ctx); err != nil {
 			fmt.Printf("error shutting down http server: %s", err.Error())
 		}
 
-		if cfg.Verbose {
+		if r.config.Verbose {
 			log.Println("bye, bye!")
 		}
-	}(ctx, s, r, httpServer)
+	}(ctx, r)
 }
