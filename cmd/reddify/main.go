@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +15,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// Load config from config file and environment
 	cfg, err := config.Load()
 	if err != nil {
@@ -36,13 +39,18 @@ func main() {
 		log.Fatalf("error creating reddit client: %s", err.Error())
 	}
 
-	// Set up a very basic http server to handle auth callbacks
-	http.HandleFunc("/spotifyAuth", s.AuthHandler())
-	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.HTTPPort), nil); err != nil {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/spotifyAuth", s.AuthHandler())
+	httpServer := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.HTTPPort),
+		Handler: mux,
+	}
+
+	go func(s *http.Server) {
+		if err := s.ListenAndServe(); err != nil {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
-	}()
+	}(httpServer)
 
 	// Authenticate spotify
 	s.Log("awaiting authentication...")
@@ -61,7 +69,7 @@ func main() {
 	}
 
 	// Start listening and block until shutdown signal receieved
-	func(s *spotify.Client, r *reddit.Client) {
+	func(ctx context.Context, s *spotify.Client, r *reddit.Client, h *http.Server) {
 		shutdown := make(chan os.Signal, 1)
 		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
@@ -75,8 +83,12 @@ func main() {
 		s.Close()
 		r.Close()
 
+		if err := h.Shutdown(ctx); err != nil {
+			fmt.Printf("error shutting down http server: %s", err.Error())
+		}
+
 		if cfg.Verbose {
 			log.Println("bye, bye!")
 		}
-	}(s, r)
+	}(ctx, s, r, httpServer)
 }
