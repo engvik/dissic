@@ -23,7 +23,7 @@ type Client struct {
 
 func (c *Client) Run(ctx context.Context) {
 	go func(s *http.Server) {
-		if err := s.ListenAndServe(); err != nil {
+		if err := s.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
 	}(c.HTTP)
@@ -33,6 +33,11 @@ func (c *Client) Run(ctx context.Context) {
 	c.Spotify.Authenticate()
 	<-c.Spotify.AuthChan
 	c.Spotify.Log("authenticated!")
+
+	// HTTP server no longer needed
+	if err := c.HTTP.Shutdown(ctx); err != nil {
+		fmt.Printf("error shutting down http server: %s", err.Error())
+	}
 
 	// Get Spotify playlists
 	if err := c.Spotify.GetPlaylists(c.Config); err != nil {
@@ -58,10 +63,6 @@ func (c *Client) Run(ctx context.Context) {
 
 		c.Spotify.Close()
 		c.Reddit.Close()
-
-		if err := c.HTTP.Shutdown(ctx); err != nil {
-			fmt.Printf("error shutting down http server: %s", err.Error())
-		}
 
 		if c.Config.Verbose {
 			log.Println("bye, bye!")
