@@ -25,7 +25,7 @@ type Client struct {
 }
 
 func New(cfg *config.Config, m chan<- spotify.Music) (*Client, error) {
-	s, err := reddit.NewScript(cfg.GetRedditUserAgent(), 5*time.Second)
+	s, err := reddit.NewScript(cfg.GetRedditUserAgent(), time.Duration(cfg.Reddit.RequestRate))
 	if err != nil {
 		return nil, fmt.Errorf("new script: %w", err)
 	}

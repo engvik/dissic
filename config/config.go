@@ -30,6 +30,7 @@ type Config struct {
 
 type Reddit struct {
 	Username             string `yaml:"username"`
+	RequestRate          int    `yaml:"request-rate"`
 	MaxRetryAttempts     int    `yaml:"max-retry-attempts"`
 	RetryAttemptWaitTime int    `yaml:"retry-attempt-wait-time"`
 	Subreddits           []string
@@ -107,6 +108,10 @@ func (c *Config) validate() error {
 		return errors.New("reddit username is missing")
 	}
 
+	if c.Reddit.RequestRate < 2 {
+		return errors.New("reddit request rate must be 2 or higher")
+	}
+
 	if len(c.Reddit.Subreddits) <= 0 {
 		return errors.New("no subreddits passed")
 	}
@@ -131,6 +136,10 @@ func (c *Config) validate() error {
 func (c *Config) setDefaultValues() {
 	c.Version = version
 	c.Reddit.Subreddits = c.getSubreddits()
+
+	if c.Reddit.RequestRate == 0 {
+		c.Reddit.RequestRate = 5
+	}
 
 	if c.Reddit.MaxRetryAttempts == 0 {
 		c.Reddit.MaxRetryAttempts = 10

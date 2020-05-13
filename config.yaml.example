@@ -8,6 +8,8 @@ http-port: 8080
 reddit:
     # username
     username: "your-username"
+    # how often to send requests to reddit (in seconds, minimum 2)
+    request-rate: 5
     # maximum amount of times attempt reconnection if connection is suddenly lost
     max-retry-attempts: 10
     # number of seconds to wait before each retry attempt
