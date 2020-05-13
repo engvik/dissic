@@ -3,6 +3,7 @@ package spotify
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/engvik/dissic/config"
 	"github.com/pkg/browser"
@@ -26,7 +27,7 @@ func New(cfg *config.Config) (*Client, error) {
 
 	c := Client{
 		Auth:      auth,
-		Session:   "asdasdff", // TODO: Generate
+		Session:   fmt.Sprintf("dissic:%d", time.Now().Unix()),
 		AuthChan:  make(chan bool),
 		MusicChan: make(chan Music),
 		Verbose:   cfg.Verbose,
