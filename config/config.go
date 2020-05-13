@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
@@ -72,7 +73,7 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) GetRedditUserAgent() string {
-	return fmt.Sprintf("graw:dissic:%s:%s", c.Version, c.Reddit.Username)
+	return fmt.Sprintf("%s:github.com/engvik/dissic:%s (by /u/%s)", runtime.GOOS, c.Version, c.Reddit.Username)
 }
 
 func (c *Config) getSubreddits() []string {
