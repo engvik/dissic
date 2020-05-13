@@ -1,4 +1,4 @@
-module github.com/engvik/reddify
+module github.com/engvik/dissic
 
 go 1.14
 

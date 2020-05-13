@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/engvik/reddify/config"
+	"github.com/engvik/dissic/config"
 	"github.com/zmb3/spotify"
 )
 
@@ -86,7 +86,7 @@ func (c *Client) getPlaylistByName(user *spotify.PrivateUser, name string) (*spo
 	}
 
 	if playlist == nil {
-		playlist, err = c.C.CreatePlaylistForUser(user.ID, name, "reddify", false)
+		playlist, err = c.C.CreatePlaylistForUser(user.ID, name, "dissic", false)
 		if err != nil {
 			return nil, fmt.Errorf("creating playlist %s: %w", name, err)
 		}

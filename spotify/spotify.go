@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/engvik/reddify/config"
+	"github.com/engvik/dissic/config"
 	"github.com/pkg/browser"
 	"github.com/zmb3/spotify"
 )

@@ -9,9 +9,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/engvik/reddify/config"
-	"github.com/engvik/reddify/reddit"
-	"github.com/engvik/reddify/spotify"
+	"github.com/engvik/dissic/config"
+	"github.com/engvik/dissic/reddit"
+	"github.com/engvik/dissic/spotify"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	}
 
 	if cfg.Verbose {
-		log.Printf("reddify %s", cfg.Version)
+		log.Printf("dissic %s", cfg.Version)
 	}
 
 	// Set up spotify client
@@ -42,7 +42,7 @@ func main() {
 	// Set up http server
 	mux := http.NewServeMux()
 	mux.HandleFunc("/spotifyAuth", s.AuthHandler())
-	rdfy := reddify{
+	d := dissic{
 		config:  cfg,
 		spotify: s,
 		reddit:  r,
@@ -52,60 +52,60 @@ func main() {
 		},
 	}
 
-	rdfy.start(ctx)
+	d.start(ctx)
 }
 
-type reddify struct {
+type dissic struct {
 	config  *config.Config
 	spotify *spotify.Client
 	reddit  *reddit.Client
 	http    *http.Server
 }
 
-func (r *reddify) start(ctx context.Context) {
+func (d *dissic) start(ctx context.Context) {
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != nil {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
-	}(r.http)
+	}(d.http)
 
 	// Authenticate spotify
-	r.spotify.Log("awaiting authentication...")
-	r.spotify.Authenticate()
-	<-r.spotify.AuthChan
-	r.spotify.Log("authenticated!")
+	d.spotify.Log("awaiting authentication...")
+	d.spotify.Authenticate()
+	<-d.spotify.AuthChan
+	d.spotify.Log("authenticated!")
 
 	// Get Spotify playlists
-	if err := r.spotify.GetPlaylists(r.config); err != nil {
+	if err := d.spotify.GetPlaylists(d.config); err != nil {
 		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
 
 	// Prepare the reddit scanner
-	if err := r.reddit.PrepareScanner(); err != nil {
+	if err := d.reddit.PrepareScanner(); err != nil {
 		log.Fatalf("error preparing reddit/graw scanner: %s", err.Error())
 	}
 
 	// Start listening and block until shutdown signal receieved
-	func(ctx context.Context, r *reddify) {
+	func(ctx context.Context, d *dissic) {
 		shutdown := make(chan os.Signal, 1)
 		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
-		go r.spotify.Listen()
-		r.spotify.Log("worker ready")
-		go r.reddit.Listen(shutdown)
-		r.reddit.Log("worker ready")
+		go d.spotify.Listen()
+		d.spotify.Log("worker ready")
+		go d.reddit.Listen(shutdown)
+		d.reddit.Log("worker ready")
 
 		<-shutdown
 
-		r.spotify.Close()
-		r.reddit.Close()
+		d.spotify.Close()
+		d.reddit.Close()
 
-		if err := r.http.Shutdown(ctx); err != nil {
+		if err := d.http.Shutdown(ctx); err != nil {
 			fmt.Printf("error shutting down http server: %s", err.Error())
 		}
 
-		if r.config.Verbose {
+		if d.config.Verbose {
 			log.Println("bye, bye!")
 		}
-	}(ctx, r)
+	}(ctx, d)
 }

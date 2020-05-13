@@ -57,7 +57,7 @@ func Load() (*Config, error) {
 	}
 
 	var env environment
-	if err := envconfig.Process("reddify", &env); err != nil {
+	if err := envconfig.Process("dissic", &env); err != nil {
 		return nil, fmt.Errorf("parsing environment variables: %w", err)
 	}
 
@@ -72,7 +72,7 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) GetRedditUserAgent() string {
-	return fmt.Sprintf("graw:reddify:%s by /u/%s", c.Version, c.Reddit.Username)
+	return fmt.Sprintf("graw:dissic:%s:%s", c.Version, c.Reddit.Username)
 }
 
 func (c *Config) getSubreddits() []string {

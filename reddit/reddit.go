@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/engvik/reddify/config"
-	"github.com/engvik/reddify/spotify"
+	"github.com/engvik/dissic/config"
+	"github.com/engvik/dissic/spotify"
 	"github.com/turnage/graw"
 	"github.com/turnage/graw/reddit"
 )
