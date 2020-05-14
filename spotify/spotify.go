@@ -66,7 +66,7 @@ func (c *Client) handle(m Music) {
 
 		track, err := c.getTrack(title)
 		if err != nil {
-			c.Log(fmt.Sprintf("\tget track: %s", err.Error()))
+			c.Log(fmt.Sprintf("\ttrack: %s", err.Error()))
 			continue
 		}
 
