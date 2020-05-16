@@ -30,7 +30,7 @@ func (c *Client) Run(ctx context.Context) {
 
 	// Authenticate spotify
 	c.Spotify.Log("awaiting authentication...")
-	c.Spotify.Authenticate()
+	c.Spotify.Authenticate(c.Config.AuthOpenBrowser)
 	<-c.Spotify.AuthChan
 	c.Spotify.Log("authenticated!")
 

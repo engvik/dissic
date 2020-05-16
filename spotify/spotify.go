@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/engvik/dissic/config"
+	"github.com/pkg/browser"
 	"github.com/zmb3/spotify"
 )
 
@@ -40,12 +41,17 @@ func New(cfg *config.Config) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) Authenticate() error {
-	// TODO: Config if auto-browser
+func (c *Client) Authenticate(openBrowser bool) error {
+
+	if openBrowser {
+		if err := browser.OpenURL(c.AuthURL); err != nil {
+			return fmt.Errorf("opening url (%s): %w", c.AuthURL, err)
+		}
+
+		return nil
+	}
+
 	c.Log(fmt.Sprintf("open url to authenticate: %s", c.AuthURL))
-	/*	if err := browser.OpenURL(c.AuthURL); err != nil {
-		return fmt.Errorf("opening url (%s): %w", c.AuthURL, err)
-	} */
 
 	return nil
 }

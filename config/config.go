@@ -20,12 +20,13 @@ type environment struct {
 }
 
 type Config struct {
-	Reddit    Reddit     `yaml:"reddit"`
-	Spotify   Spotify    `yaml:"spotify"`
-	Playlists []Playlist `yaml:"playlists"`
-	HTTPPort  int        `yaml:"http-port"`
-	Verbose   bool       `yaml:"verbose"`
-	Version   string
+	Reddit          Reddit     `yaml:"reddit"`
+	Spotify         Spotify    `yaml:"spotify"`
+	Playlists       []Playlist `yaml:"playlists"`
+	HTTPPort        int        `yaml:"http-port"`
+	Verbose         bool       `yaml:"verbose"`
+	AuthOpenBrowser bool       `yaml:"auth-open-browser"`
+	Version         string
 }
 
 type Reddit struct {

@@ -4,6 +4,9 @@ verbose: true
 # HTTP port
 http-port: 8080
 
+# auto open browser for auth
+auth-open-browser: false
+
 # reddit config
 reddit:
     # username
