@@ -62,7 +62,7 @@ func (c *Client) createSearchQuery(title string, separator string) (string, erro
 	searchQuery = strings.TrimSpace(searchQuery)
 
 	c.Log(fmt.Sprintf("\tsearch query: \"%s\" from title: %s", searchQuery, title))
-	return title, nil
+	return searchQuery, nil
 }
 
 func (c *Client) search(q string) (*spotify.SearchResult, error) {
