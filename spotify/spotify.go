@@ -66,7 +66,7 @@ func (c *Client) Listen() {
 }
 
 func (c *Client) handle(m Music) {
-	for _, title := range m.titleStringArray() {
+	for _, title := range m.titleStringSlice() {
 		if title == "" {
 			continue
 		}

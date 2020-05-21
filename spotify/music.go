@@ -7,6 +7,6 @@ type Music struct {
 	SecureMediaTitle string
 }
 
-func (m *Music) titleStringArray() []string {
+func (m *Music) titleStringSlice() []string {
 	return []string{m.PostTitle, m.MediaTitle, m.SecureMediaTitle}
 }
