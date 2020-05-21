@@ -10,14 +10,30 @@ import (
 	"syscall"
 
 	"github.com/engvik/dissic/config"
-	"github.com/engvik/dissic/reddit"
-	"github.com/engvik/dissic/spotify"
+	"github.com/turnage/graw/reddit"
 )
+
+type spotifyService interface {
+	Authenticate(openBrowser bool) error
+	Listen()
+	Log(s string)
+	Close()
+	GetPlaylists(cfg *config.Config) error
+	AuthHandler() http.HandlerFunc
+}
+
+type redditService interface {
+	PrepareScanner() error
+	Listen(shutdown chan<- os.Signal)
+	Close()
+	Post(post *reddit.Post) error
+	Log(s string)
+}
 
 type Client struct {
 	Config  *config.Config
-	Spotify *spotify.Client
-	Reddit  *reddit.Client
+	Spotify spotifyService
+	Reddit  redditService
 	HTTP    *http.Server
 }
 
@@ -31,7 +47,7 @@ func (c *Client) Run(ctx context.Context) {
 	// Authenticate spotify
 	c.Spotify.Log("awaiting authentication...")
 	c.Spotify.Authenticate(c.Config.AuthOpenBrowser)
-	<-c.Spotify.AuthChan
+	// <-c.Spotify.AuthChan
 	c.Spotify.Log("authenticated!")
 
 	// HTTP server no longer needed

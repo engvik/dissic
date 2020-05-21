@@ -42,16 +42,16 @@ func New(cfg *config.Config) (*Client, error) {
 }
 
 func (c *Client) Authenticate(openBrowser bool) error {
-
 	if openBrowser {
 		if err := browser.OpenURL(c.AuthURL); err != nil {
 			return fmt.Errorf("opening url (%s): %w", c.AuthURL, err)
 		}
-
-		return nil
+	} else {
+		c.Log(fmt.Sprintf("open url to authenticate: %s", c.AuthURL))
 	}
 
-	c.Log(fmt.Sprintf("open url to authenticate: %s", c.AuthURL))
+	// Block until authenticated
+	<-c.AuthChan
 
 	return nil
 }
