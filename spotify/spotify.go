@@ -19,6 +19,7 @@ type Client struct {
 	C                 spotify.Client
 	SubredditPlaylist map[string]spotify.ID
 	Verbose           bool
+	User              *spotify.PrivateUser
 }
 
 func New(cfg *config.Config) (*Client, error) {
