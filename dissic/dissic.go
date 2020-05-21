@@ -18,8 +18,9 @@ type spotifyService interface {
 	Listen()
 	Log(s string)
 	Close()
-	GetPlaylists(cfg *config.Config) error
+	PreparePlaylists(cfg *config.Config) error
 	AuthHandler() http.HandlerFunc
+	SetUser() error
 }
 
 type redditService interface {
@@ -54,8 +55,13 @@ func (s *Service) Run(ctx context.Context) {
 		fmt.Printf("error shutting down http server: %s", err.Error())
 	}
 
+	// Get and set Spotify user
+	if err := s.Spotify.SetUser(); err != nil {
+		log.Fatalf("error setting user ID: %s", err.Error())
+	}
+
 	// Get Spotify playlists
-	if err := s.Spotify.GetPlaylists(s.Config); err != nil {
+	if err := s.Spotify.PreparePlaylists(s.Config); err != nil {
 		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
 
