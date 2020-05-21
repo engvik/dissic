@@ -1,3 +1,4 @@
+// package spotify contains an implementaion of the spotify service.
 package spotify
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/zmb3/spotify"
 )
 
+// Client is the spotify client
 type Client struct {
 	Auth              spotify.Authenticator
 	AuthURL           string
@@ -22,6 +24,8 @@ type Client struct {
 	User              *spotify.PrivateUser
 }
 
+// New sets up a new spotify client. It takes the configuration and returns
+// a client or an error.
 func New(cfg *config.Config) (*Client, error) {
 	callbackURL := fmt.Sprintf("http://localhost:%d/spotifyAuth", cfg.HTTPPort)
 	auth := spotify.NewAuthenticator(callbackURL, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistModifyPrivate, spotify.ScopePlaylistModifyPublic)
@@ -42,6 +46,9 @@ func New(cfg *config.Config) (*Client, error) {
 	return &c, nil
 }
 
+// Authenticate handles the authentication against the Spotify API.
+// It either opens the browser or tells the user to navigate to a URL.
+// It will also block until authentication is done.
 func (c *Client) Authenticate(openBrowser bool) error {
 	if openBrowser {
 		if err := browser.OpenURL(c.AuthURL); err != nil {
@@ -57,6 +64,7 @@ func (c *Client) Authenticate(openBrowser bool) error {
 	return nil
 }
 
+// Listen listens for incoming data on the music channel.
 func (c *Client) Listen() {
 	for {
 		select {
@@ -91,12 +99,14 @@ func (c *Client) handle(m Music) {
 	}
 }
 
+// Log logs..
 func (c *Client) Log(s string) {
 	if c.Verbose {
 		log.Printf("spotify:\t%s\n", s)
 	}
 }
 
+// Closes properly closes the Spotify client
 func (c *Client) Close() {
 	c.Log("shutting down")
 	close(c.AuthChan)

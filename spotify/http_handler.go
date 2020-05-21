@@ -2,6 +2,7 @@ package spotify
 
 import "net/http"
 
+// AuthHandler is a simple http handler for the authentication callback.
 func (c *Client) AuthHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := c.Auth.Token(c.Session, r)

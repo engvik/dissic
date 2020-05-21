@@ -1,5 +1,7 @@
 package spotify
 
+// Music contains data about potential new music to add to
+// a spotify list.
 type Music struct {
 	Subreddit        string
 	PostTitle        string

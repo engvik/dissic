@@ -9,12 +9,14 @@ import (
 	"github.com/zmb3/spotify"
 )
 
-type SubredditPlaylist map[string]spotify.ID
-
+// ErrInvalidID is the error for an invalid playlist id
 const ErrInvalidID = "Invalid playlist Id"
 
+// PreparePlaylists checks the playlists defined in the config and fetches
+// them from Spotify. If a playlist is passed by name, it's created if it
+// doesn't exist. It also connects the subreddits to a corresponding playlist id.
 func (c *Client) PreparePlaylists(cfg *config.Config) error {
-	subredditPlaylist := make(SubredditPlaylist, len(cfg.Reddit.Subreddits))
+	subredditPlaylist := make(map[string]spotify.ID, len(cfg.Reddit.Subreddits))
 
 	for _, p := range cfg.Playlists {
 		// get playlist

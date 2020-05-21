@@ -1,3 +1,5 @@
+// package dissic are responsible for setting up and starting dissic.
+// It holds the services needed and sets up and tears down everything.
 package dissic
 
 import (
@@ -31,6 +33,7 @@ type redditService interface {
 	Log(s string)
 }
 
+// Service is the dissic service. It holds the config and all other services.
 type Service struct {
 	Config  *config.Config
 	Spotify spotifyService
@@ -38,6 +41,8 @@ type Service struct {
 	HTTP    *http.Server
 }
 
+// Run starts the dissic service. It takes care of authentication, sets up
+// listeneres and are responisble for properly tearing everything down.
 func (s *Service) Run(ctx context.Context) {
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {

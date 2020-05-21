@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// SetUser fetches the authenticated users and
+// sets it on the client.
 func (c *Client) SetUser() error {
 	user, err := c.C.CurrentUser()
 	if err != nil {

@@ -1,3 +1,5 @@
+// package config contains the dissic config and methods to add
+// default values and validation.
 package config
 
 import (
@@ -19,6 +21,7 @@ type environment struct {
 	SpotifyClientSecret string `envconfig:"SPOTIFY_CLIENT_SECRET"`
 }
 
+// Config holds the entire dissic config (config.yaml and env vars)
 type Config struct {
 	Reddit          Reddit     `yaml:"reddit"`
 	Spotify         Spotify    `yaml:"spotify"`
@@ -29,6 +32,7 @@ type Config struct {
 	Version         string
 }
 
+// Reddit holds the reddit related configuration.
 type Reddit struct {
 	Username             string `yaml:"username"`
 	RequestRate          int    `yaml:"request-rate"`
@@ -37,17 +41,21 @@ type Reddit struct {
 	Subreddits           []string
 }
 
+// Spotify holds the reddit related configuration.
 type Spotify struct {
 	ClientID     string `yaml:"client-id"`
 	ClientSecret string `yaml:"client-secret"`
 }
 
+// Playlist contains the playlist configuration
 type Playlist struct {
 	Name       string   `yaml:"name"`
 	ID         string   `yaml:"id"`
 	Subreddits []string `yaml:"subreddits"`
 }
 
+// Loads reads config from file and environment variables. It also adds
+// default values where applicable and validates the config before returning.
 func Load() (*Config, error) {
 	cf, err := readConfigFile()
 	if err != nil {
@@ -74,6 +82,7 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
+// GetRedditUserAgent creates a reddit user agent for graw
 func (c *Config) GetRedditUserAgent() string {
 	return fmt.Sprintf("%s:github.com/engvik/dissic:%s (by /u/%s)", runtime.GOOS, c.Version, c.Reddit.Username)
 }
