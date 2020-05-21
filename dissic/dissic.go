@@ -30,58 +30,57 @@ type redditService interface {
 	Log(s string)
 }
 
-type Client struct {
+type Service struct {
 	Config  *config.Config
 	Spotify spotifyService
 	Reddit  redditService
 	HTTP    *http.Server
 }
 
-func (c *Client) Run(ctx context.Context) {
+func (s *Service) Run(ctx context.Context) {
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("error starting http server: %s", err.Error())
 		}
-	}(c.HTTP)
+	}(s.HTTP)
 
 	// Authenticate spotify
-	c.Spotify.Log("awaiting authentication...")
-	c.Spotify.Authenticate(c.Config.AuthOpenBrowser)
-	// <-c.Spotify.AuthChan
-	c.Spotify.Log("authenticated!")
+	s.Spotify.Log("awaiting authentication...")
+	s.Spotify.Authenticate(s.Config.AuthOpenBrowser)
+	s.Spotify.Log("authenticated!")
 
 	// HTTP server no longer needed
-	if err := c.HTTP.Shutdown(ctx); err != nil {
+	if err := s.HTTP.Shutdown(ctx); err != nil {
 		fmt.Printf("error shutting down http server: %s", err.Error())
 	}
 
 	// Get Spotify playlists
-	if err := c.Spotify.GetPlaylists(c.Config); err != nil {
+	if err := s.Spotify.GetPlaylists(s.Config); err != nil {
 		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
 
 	// Prepare the reddit scanner
-	if err := c.Reddit.PrepareScanner(); err != nil {
+	if err := s.Reddit.PrepareScanner(); err != nil {
 		log.Fatalf("error preparing reddit/graw scanner: %s", err.Error())
 	}
 
 	// Start listening and block until shutdown signal receieved
-	func(ctx context.Context, c *Client) {
+	func(ctx context.Context, s *Service) {
 		shutdown := make(chan os.Signal, 1)
 		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
-		go c.Spotify.Listen()
-		c.Spotify.Log("worker ready")
-		go c.Reddit.Listen(shutdown)
-		c.Reddit.Log("worker ready")
+		go s.Spotify.Listen()
+		s.Spotify.Log("worker ready")
+		go s.Reddit.Listen(shutdown)
+		s.Reddit.Log("worker ready")
 
 		<-shutdown
 
-		c.Spotify.Close()
-		c.Reddit.Close()
+		s.Spotify.Close()
+		s.Reddit.Close()
 
-		if c.Config.Verbose {
+		if s.Config.Verbose {
 			log.Println("bye, bye!")
 		}
-	}(ctx, c)
+	}(ctx, s)
 }

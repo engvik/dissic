@@ -41,8 +41,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/spotifyAuth", s.AuthHandler())
 
-	// Set up dissic client
-	d := dissic.Client{
+	// Set up dissic
+	d := dissic.Service{
 		Config:  cfg,
 		Spotify: s,
 		Reddit:  r,
@@ -52,6 +52,6 @@ func main() {
 		},
 	}
 
-	// Run dissic client
+	// Run dissic
 	d.Run(ctx)
 }
