@@ -12,7 +12,7 @@ import (
 
 const ErrInvalidID = "Invalid playlist Id"
 
-func (c *Client) GetPlaylists(cfg *config.Config) error {
+func (c *Client) PreparePlaylists(cfg *config.Config) error {
 	spm := make(map[string]spotify.ID, len(cfg.Reddit.Subreddits))
 	user, err := c.C.CurrentUser()
 	if err != nil {

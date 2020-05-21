@@ -18,7 +18,7 @@ type spotifyService interface {
 	Listen()
 	Log(s string)
 	Close()
-	GetPlaylists(cfg *config.Config) error
+	PreparePlaylists(cfg *config.Config) error
 	AuthHandler() http.HandlerFunc
 }
 
@@ -55,7 +55,7 @@ func (s *Service) Run(ctx context.Context) {
 	}
 
 	// Get Spotify playlists
-	if err := s.Spotify.GetPlaylists(s.Config); err != nil {
+	if err := s.Spotify.PreparePlaylists(s.Config); err != nil {
 		log.Fatalf("error preparing playlists: %s", err.Error())
 	}
 
