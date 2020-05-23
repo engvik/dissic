@@ -75,7 +75,6 @@ func (c *Client) Listen() {
 }
 
 func (c *Client) handle(m Music) {
-	// TODO: Refactor and cleanup this
 	if m.URL != "" {
 		track, err := c.getTrackByURL(m.URL)
 		if err != nil {

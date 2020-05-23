@@ -66,8 +66,6 @@ func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
 				return track, errors.New("no match in search result")
 			}
 
-			return track, nil
-
 			time.Sleep(1 * time.Second) // TODO: Handle better with workers for entire chan
 		}
 	}
