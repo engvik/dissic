@@ -75,27 +75,30 @@ func (c *Client) Listen() {
 }
 
 func (c *Client) handle(m Music) {
-	for _, title := range m.titleStringSlice() {
-		if title == "" {
-			continue
-		}
-
-		track, err := c.getTrack(title)
+	// TODO: Refactor and cleanup this
+	if m.URL != "" {
+		track, err := c.getTrackByURL(m.URL)
 		if err != nil {
-			c.Log(fmt.Sprintf("\ttrack: %s", err.Error()))
-			continue
+			c.Log(fmt.Sprintf("\ttrack by url: %s", err.Error()))
 		}
 
-		playlist, ok := c.SubredditPlaylist[m.Subreddit]
-		if !ok {
-			c.Log(fmt.Sprintf("no playlist found for subreddit: %s", m.Subreddit))
-		}
+		if track != nil {
+			if err := c.addToPlaylist(m.Subreddit, track.ID); err != nil {
+				c.Log(fmt.Sprintf("\tadding track to playlist: %s", err.Error()))
+			}
 
-		if err := c.addToPlaylist(playlist, track.ID); err != nil {
-			c.Log(fmt.Sprintf("\teadding track to playlist: %s", err.Error()))
+			return
 		}
+	}
 
+	track, err := c.getTrackByTitles(m)
+	if err != nil {
+		c.Log(fmt.Sprintf("\ttrack by title: %s", err.Error()))
 		return
+	}
+
+	if err := c.addToPlaylist(m.Subreddit, track.ID); err != nil {
+		c.Log(fmt.Sprintf("\tadding track to playlist: %s", err.Error()))
 	}
 }
 

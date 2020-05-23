@@ -113,6 +113,7 @@ func (c *Client) Post(post *reddit.Post) error {
 		PostTitle:        post.Title,
 		MediaTitle:       post.Media.OEmbed.Title,
 		SecureMediaTitle: post.SecureMedia.OEmbed.Title,
+		URL:              post.URL,
 	}
 
 	return nil

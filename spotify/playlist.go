@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -104,7 +105,12 @@ func (c *Client) createPlaylist(name string) (*spotify.FullPlaylist, error) {
 	return playlist, nil
 }
 
-func (c *Client) addToPlaylist(playlistID spotify.ID, trackID spotify.ID) error {
+func (c *Client) addToPlaylist(subreddit string, trackID spotify.ID) error {
+	playlistID, ok := c.SubredditPlaylist[subreddit]
+	if !ok {
+		return errors.New(fmt.Sprintf("no playlist found for subreddit: %s", subreddit))
+	}
+
 	snapshotID, err := c.C.AddTracksToPlaylist(playlistID, trackID)
 	if err != nil {
 		return fmt.Errorf("adding track: playlist %s, track %s: %w", playlistID, trackID, err)

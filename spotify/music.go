@@ -7,6 +7,7 @@ type Music struct {
 	PostTitle        string
 	MediaTitle       string
 	SecureMediaTitle string
+	URL              string
 }
 
 func (m *Music) titleStringSlice() []string {
