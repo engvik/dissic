@@ -62,8 +62,8 @@ func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
 			}
 
 			track, found := c.findMatchFromSearchResult(title, res)
-			if !found {
-				return track, errors.New("no match in search result")
+			if found {
+				return track, nil
 			}
 
 			time.Sleep(1 * time.Second) // TODO: Handle better with workers for entire chan
