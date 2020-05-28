@@ -10,33 +10,39 @@ func TestCreateSearchQuery(t *testing.T) {
 		exp       string
 	}{
 		{
-			"shoulde parse separator '-' correctly",
+			"should parse separator '-' correctly",
 			"Something - Something",
 			"-",
 			"Something Something",
 		},
 		{
-			"shoulde parse separator '~' correctly",
+			"should parse separator '~' correctly",
 			"Something ~ Something",
 			"~",
 			"Something Something",
 		},
 		{
-			"shoulde parse separator '|' correctly",
+			"should parse separator '|' correctly",
 			"Something | Something",
 			"|",
 			"Something Something",
 		},
 		{
-			"shoulde parse separator 'by' correctly",
+			"should parse separator 'by' correctly",
 			"Something by Something",
 			"by",
 			"Something Something",
 		},
 		{
-			"shoulde parse separator '--' correctly",
+			"should parse separator '--' correctly",
 			"Something -- Something",
 			"--",
+			"Something Something",
+		},
+		{
+			"should parse separator 'ー' correctly",
+			"Something ー Something",
+			"ー",
 			"Something Something",
 		},
 	}

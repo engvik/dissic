@@ -43,7 +43,7 @@ func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
 			continue
 		}
 
-		separators := []string{"-", "~", "|", "by", "--"}
+		separators := []string{"-", "~", "|", "by", "--", "ー"}
 
 		// attempt finding search query for different track separators
 		for _, s := range separators {
