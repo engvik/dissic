@@ -28,10 +28,12 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 
 		// not found, but name provided, create playlist
 		if playlist == nil && p.Name != "" {
-			playlist, err = c.createPlaylist(p.Name)
+			playlist, err = c.Spotify.CreatePlaylistForUser(c.User.ID, p.Name, "dissic", false)
 			if err != nil {
 				return fmt.Errorf("error creating playlist: %w", err)
 			}
+
+			c.Log(fmt.Sprintf("created playlist: %s", p.Name))
 		}
 
 		// create subreddit playlist map
@@ -90,17 +92,6 @@ func (c *Client) getPlaylistByName(name string) (*spotify.FullPlaylist, error) {
 			break
 		}
 	}
-
-	return playlist, nil
-}
-
-func (c *Client) createPlaylist(name string) (*spotify.FullPlaylist, error) {
-	playlist, err := c.Spotify.CreatePlaylistForUser(c.User.ID, name, "dissic", false)
-	if err != nil {
-		return nil, fmt.Errorf("creating playlist %s: %w", name, err)
-	}
-
-	c.Log(fmt.Sprintf("created playlist: %s", name))
 
 	return playlist, nil
 }

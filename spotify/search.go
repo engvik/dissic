@@ -31,7 +31,7 @@ func (c *Client) getTrackByURL(URL string) (*spotify.FullTrack, error) {
 		return nil, errors.New(fmt.Sprintf("not a track path: %s", parsedURL.Path))
 	}
 
-	return c.getTrackSPTF(splitURL[2])
+	return c.Spotify.GetTrack(spotify.ID(splitURL[2]))
 }
 
 func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
@@ -55,7 +55,7 @@ func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
 			}
 
 			// search by query
-			res, err := c.search(searchQuery)
+			res, err := c.Spotify.Search(searchQuery, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 			if err != nil {
 				c.Log(fmt.Sprintf("search: %s", err.Error()))
 				continue
@@ -109,12 +109,4 @@ func (c *Client) createSearchQuery(title string, separator string) (string, erro
 
 	c.Log(fmt.Sprintf("\tsearch query: \"%s\" from title: %s", searchQuery, title))
 	return searchQuery, nil
-}
-
-func (c *Client) search(q string) (*spotify.SearchResult, error) {
-	return c.Spotify.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
-}
-
-func (c *Client) getTrackSPTF(ID string) (*spotify.FullTrack, error) {
-	return c.Spotify.GetTrack(spotify.ID(ID))
 }
