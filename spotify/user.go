@@ -7,7 +7,7 @@ import (
 // SetUser fetches the authenticated users and
 // sets it on the client.
 func (c *Client) SetUser() error {
-	user, err := c.C.CurrentUser()
+	user, err := c.Spotify.CurrentUser()
 	if err != nil {
 		return fmt.Errorf("getting user: %w", err)
 	}

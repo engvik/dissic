@@ -11,7 +11,7 @@ func (c *Client) AuthHandler() http.HandlerFunc {
 			return
 		}
 
-		c.C = c.Auth.NewClient(token)
+		c.Spotify = c.Auth.NewClient(token)
 		c.AuthChan <- true
 		w.Write([]byte("All good - you can close this window now"))
 	}

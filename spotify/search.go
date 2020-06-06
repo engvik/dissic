@@ -112,9 +112,9 @@ func (c *Client) createSearchQuery(title string, separator string) (string, erro
 }
 
 func (c *Client) search(q string) (*spotify.SearchResult, error) {
-	return c.C.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
+	return c.Spotify.Search(q, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 }
 
 func (c *Client) getTrackSPTF(ID string) (*spotify.FullTrack, error) {
-	return c.C.GetTrack(spotify.ID(ID))
+	return c.Spotify.GetTrack(spotify.ID(ID))
 }

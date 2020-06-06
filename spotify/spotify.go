@@ -13,12 +13,13 @@ import (
 
 // Client is the spotify client
 type Client struct {
+	spotify.Client
 	Auth              spotify.Authenticator
 	AuthURL           string
 	Session           string
 	AuthChan          chan bool
 	MusicChan         chan Music
-	C                 spotify.Client
+	Spotify           spotify.Client
 	SubredditPlaylist map[string]spotify.ID
 	Verbose           bool
 	User              *spotify.PrivateUser

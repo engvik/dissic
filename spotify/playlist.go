@@ -60,7 +60,7 @@ func (c *Client) getPlaylist(p config.Playlist) (*spotify.FullPlaylist, error) {
 }
 
 func (c *Client) getPlaylistByID(ID string) (*spotify.FullPlaylist, error) {
-	playlist, err := c.C.GetPlaylist(spotify.ID(ID))
+	playlist, err := c.Spotify.GetPlaylist(spotify.ID(ID))
 	if err != nil {
 		return nil, fmt.Errorf("getting playlist %s: %w", ID, err)
 	}
@@ -71,7 +71,7 @@ func (c *Client) getPlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 }
 
 func (c *Client) getPlaylistByName(name string) (*spotify.FullPlaylist, error) {
-	res, err := c.C.GetPlaylistsForUser(c.User.ID)
+	res, err := c.Spotify.GetPlaylistsForUser(c.User.ID)
 	if err != nil {
 		return nil, fmt.Errorf("getting playlists for %s: %w", c.User.ID, err)
 	}
@@ -80,7 +80,7 @@ func (c *Client) getPlaylistByName(name string) (*spotify.FullPlaylist, error) {
 
 	for _, p := range res.Playlists {
 		if p.Name == name {
-			playlist, err = c.C.GetPlaylist(p.ID)
+			playlist, err = c.Spotify.GetPlaylist(p.ID)
 			if err != nil {
 				return nil, fmt.Errorf("getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
@@ -95,7 +95,7 @@ func (c *Client) getPlaylistByName(name string) (*spotify.FullPlaylist, error) {
 }
 
 func (c *Client) createPlaylist(name string) (*spotify.FullPlaylist, error) {
-	playlist, err := c.C.CreatePlaylistForUser(c.User.ID, name, "dissic", false)
+	playlist, err := c.Spotify.CreatePlaylistForUser(c.User.ID, name, "dissic", false)
 	if err != nil {
 		return nil, fmt.Errorf("creating playlist %s: %w", name, err)
 	}
@@ -111,7 +111,7 @@ func (c *Client) addToPlaylist(subreddit string, trackID spotify.ID) error {
 		return errors.New(fmt.Sprintf("no playlist found for subreddit: %s", subreddit))
 	}
 
-	snapshotID, err := c.C.AddTracksToPlaylist(playlistID, trackID)
+	snapshotID, err := c.Spotify.AddTracksToPlaylist(playlistID, trackID)
 	if err != nil {
 		return fmt.Errorf("adding track: playlist %s, track %s: %w", playlistID, trackID, err)
 	}
