@@ -102,6 +102,17 @@ func (c *Client) addToPlaylist(subreddit string, trackID spotify.ID) error {
 		return errors.New(fmt.Sprintf("no playlist found for subreddit: %s", subreddit))
 	}
 
+	playlist, err := c.Spotify.GetPlaylistTracks(playlistID)
+	if err != nil {
+		return fmt.Errorf("error getting playlist tracks (%s): %w", playlistID, err)
+	}
+
+	for _, t := range playlist.Tracks {
+		if t.Track.ID == trackID {
+			return fmt.Errorf("track already in playlist: %s - %s (%s)", t.Track.Artists, t.Track.Name, trackID)
+		}
+	}
+
 	snapshotID, err := c.Spotify.AddTracksToPlaylist(playlistID, trackID)
 	if err != nil {
 		return fmt.Errorf("adding track: playlist %s, track %s: %w", playlistID, trackID, err)
