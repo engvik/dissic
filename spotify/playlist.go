@@ -28,7 +28,7 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 
 		// not found, but name provided, create playlist
 		if playlist == nil && p.Name != "" {
-			playlist, err = c.Spotify.CreatePlaylistForUser(c.User.ID, p.Name, "dissic", false)
+			playlist, err = c.Spotify.CreatePlaylistForUser(c.User.ID, p.Name, cfg.PlaylistDescription, false)
 			if err != nil {
 				return fmt.Errorf("error creating playlist: %w", err)
 			}

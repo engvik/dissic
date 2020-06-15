@@ -23,13 +23,14 @@ type environment struct {
 
 // Config holds the entire dissic config (config.yaml and env vars)
 type Config struct {
-	Reddit          Reddit     `yaml:"reddit"`
-	Spotify         Spotify    `yaml:"spotify"`
-	Playlists       []Playlist `yaml:"playlists"`
-	HTTPPort        int        `yaml:"http-port"`
-	Verbose         bool       `yaml:"verbose"`
-	AuthOpenBrowser bool       `yaml:"auth-open-browser"`
-	Version         string
+	Reddit              Reddit     `yaml:"reddit"`
+	Spotify             Spotify    `yaml:"spotify"`
+	Playlists           []Playlist `yaml:"playlists"`
+	HTTPPort            int        `yaml:"http-port"`
+	Verbose             bool       `yaml:"verbose"`
+	AuthOpenBrowser     bool       `yaml:"auth-open-browser"`
+	Version             string
+	PlaylistDescription string
 }
 
 // Reddit holds the reddit related configuration.
@@ -145,6 +146,7 @@ func (c *Config) validate() error {
 
 func (c *Config) setDefaultValues() {
 	c.Version = version
+	c.PlaylistDescription = "Auto-generated playlist. Generate your own with dissic: https://github.com/engvik/dissic"
 	c.Reddit.Subreddits = c.getSubreddits()
 
 	if c.Reddit.RequestRate == 0 {
