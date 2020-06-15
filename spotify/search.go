@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/zmb3/spotify"
 )
@@ -65,8 +64,6 @@ func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
 			if found {
 				return track, nil
 			}
-
-			time.Sleep(1 * time.Second) // TODO: Handle better with workers for entire chan
 		}
 	}
 
@@ -80,7 +77,7 @@ func (c *Client) findMatchFromSearchResult(title string, res *spotify.SearchResu
 	for _, t := range res.Tracks.Tracks {
 		if strings.Contains(cmprTitle, strings.ToLower(t.Name)) {
 			for _, artist := range t.Artists {
-				if strings.Contains(cmprTitle, strings.ToLower(artist.Name)) { // TODO attempt replacing & with and in title
+				if strings.Contains(cmprTitle, strings.ToLower(artist.Name)) {
 					c.Log(fmt.Sprintf("\ttrack found: %s (%s)", title, t.ID))
 					return t, true
 				}
