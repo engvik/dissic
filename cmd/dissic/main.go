@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/engvik/dissic/config"
-	"github.com/engvik/dissic/dissic"
-	"github.com/engvik/dissic/reddit"
-	"github.com/engvik/dissic/spotify"
+	"github.com/engvik/dissic/internal/config"
+	"github.com/engvik/dissic/internal/reddit"
+	"github.com/engvik/dissic/internal/spotify"
+	"github.com/engvik/dissic/pkg/dissic"
 )
 
 func main() {

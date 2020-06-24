@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/engvik/dissic/config"
-	"github.com/engvik/dissic/spotify"
+	"github.com/engvik/dissic/internal/config"
+	"github.com/engvik/dissic/internal/spotify"
 	"github.com/turnage/graw"
 	"github.com/turnage/graw/reddit"
 )
