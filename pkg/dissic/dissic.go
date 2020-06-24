@@ -41,6 +41,21 @@ type Service struct {
 	HTTP    *http.Server
 }
 
+// New returns a new dissic service.
+func New(cfg *config.Config, s spotifyService, r redditService, mux *http.ServeMux) *Service {
+	d := &Service{
+		Config:  cfg,
+		Spotify: s,
+		Reddit:  r,
+		HTTP: &http.Server{
+			Addr:    fmt.Sprintf(":%d", cfg.HTTPPort),
+			Handler: mux,
+		},
+	}
+
+	return d
+}
+
 // Run starts the dissic service. It takes care of authentication, sets up
 // listeneres and are responisble for properly tearing everything down.
 func (s *Service) Run(ctx context.Context) {

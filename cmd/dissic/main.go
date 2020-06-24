@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -25,13 +24,13 @@ func main() {
 		log.Printf("dissic %s", cfg.Version)
 	}
 
-	// Set up spotify client
+	// Set up spotify service
 	s, err := spotify.New(cfg)
 	if err != nil {
 		log.Fatalf("error creating spotify client: %s", err.Error())
 	}
 
-	// Set up reddit client
+	// Set up reddit service
 	r, err := reddit.New(cfg, s.MusicChan)
 	if err != nil {
 		log.Fatalf("error creating reddit client: %s", err.Error())
@@ -41,16 +40,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/spotifyAuth", s.AuthHandler())
 
-	// Set up dissic
-	d := dissic.Service{
-		Config:  cfg,
-		Spotify: s,
-		Reddit:  r,
-		HTTP: &http.Server{
-			Addr:    fmt.Sprintf(":%d", cfg.HTTPPort),
-			Handler: mux,
-		},
-	}
+	// Set up dissic service
+	d := dissic.New(cfg, s, r, mux)
 
 	// Run dissic
 	d.Run(ctx)
