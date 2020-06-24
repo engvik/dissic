@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/engvik/dissic/internal/config"
 	"github.com/engvik/dissic/internal/reddit"
 	"github.com/engvik/dissic/internal/spotify"
+	"github.com/engvik/dissic/pkg/config"
 	"github.com/engvik/dissic/pkg/dissic"
 )
 

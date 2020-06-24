@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/engvik/dissic/internal/config"
+	"github.com/engvik/dissic/pkg/config"
 	"github.com/zmb3/spotify"
 )
 
