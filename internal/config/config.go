@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"github.com/kelseyhightower/envconfig"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -78,6 +79,12 @@ func Load() (*Config, error) {
 
 	if err := cfg.validate(); err != nil {
 		return nil, err
+	}
+
+	if cfg.Verbose {
+		log.SetLevel(log.InfoLevel)
+	} else {
+		log.SetLevel(log.ErrorLevel)
 	}
 
 	return &cfg, nil

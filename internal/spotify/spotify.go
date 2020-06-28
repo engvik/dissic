@@ -3,11 +3,11 @@ package spotify
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/engvik/dissic/internal/config"
 	"github.com/pkg/browser"
+	log "github.com/sirupsen/logrus"
 	"github.com/zmb3/spotify"
 )
 
@@ -21,8 +21,8 @@ type Client struct {
 	MusicChan         chan Music
 	Spotify           spotify.Client
 	SubredditPlaylist map[string]spotify.ID
-	Verbose           bool
 	User              *spotify.PrivateUser
+	Logger            *log.Entry
 }
 
 // New sets up a new spotify client. It takes the configuration and returns
@@ -36,13 +36,13 @@ func New(cfg *config.Config) (*Client, error) {
 		Session:   fmt.Sprintf("dissic:%d", time.Now().Unix()),
 		AuthChan:  make(chan bool),
 		MusicChan: make(chan Music),
-		Verbose:   cfg.Verbose,
+		Logger:    log.WithFields(log.Fields{"service": "spotify"}),
 	}
 
 	c.Auth.SetAuthInfo(cfg.Spotify.ClientID, cfg.Spotify.ClientSecret)
 	c.AuthURL = c.Auth.AuthURL(c.Session)
 
-	c.Log("client setup ok")
+	c.Logger.Infoln("client setup ok")
 
 	return &c, nil
 }
@@ -56,7 +56,7 @@ func (c *Client) Authenticate(openBrowser bool) error {
 			return fmt.Errorf("opening url (%s): %w", c.AuthURL, err)
 		}
 	} else {
-		c.Log(fmt.Sprintf("open url to authenticate: %s", c.AuthURL))
+		c.Logger.Printf("open url to authenticate: %s", c.AuthURL)
 	}
 
 	// Block until authenticated
@@ -79,12 +79,12 @@ func (c *Client) handle(m Music) {
 	if m.URL != "" {
 		track, err := c.getTrackByURL(m.URL)
 		if err != nil {
-			c.Log(fmt.Sprintf("\ttrack by url: %s", err.Error()))
+			c.Logger.Infof("\ttrack by url: %s")
 		}
 
 		if track != nil {
 			if err := c.addToPlaylist(m.Subreddit, track.ID); err != nil {
-				c.Log(fmt.Sprintf("\tadding track to playlist: %s", err.Error()))
+				c.Logger.Infof("\tadding track to playlist: %s", err)
 			}
 
 			return
@@ -93,25 +93,18 @@ func (c *Client) handle(m Music) {
 
 	track, err := c.getTrackByTitles(m)
 	if err != nil {
-		c.Log(fmt.Sprintf("\ttrack by title: %s", err.Error()))
+		c.Logger.Infof("\ttrack by title: %s", err)
 		return
 	}
 
 	if err := c.addToPlaylist(m.Subreddit, track.ID); err != nil {
-		c.Log(fmt.Sprintf("\tadding track to playlist: %s", err.Error()))
-	}
-}
-
-// Log logs..
-func (c *Client) Log(s string) {
-	if c.Verbose {
-		log.Printf("spotify:\t%s\n", s)
+		c.Logger.Infof("\tadding track to playlist: %s", err)
 	}
 }
 
 // Closes properly closes the Spotify client
 func (c *Client) Close() {
-	c.Log("shutting down")
+	c.Logger.Infoln("shutting down")
 	close(c.AuthChan)
 	close(c.MusicChan)
 }

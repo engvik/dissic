@@ -3,13 +3,13 @@ package reddit
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/engvik/dissic/internal/config"
 	"github.com/engvik/dissic/internal/spotify"
+	log "github.com/sirupsen/logrus"
 	"github.com/turnage/graw"
 	"github.com/turnage/graw/reddit"
 )
@@ -23,7 +23,7 @@ type Client struct {
 	MaxRetryAttempts     int
 	Stop                 func()
 	Wait                 func() error
-	Verbose              bool
+	Logger               *log.Entry
 }
 
 // New sets up a new reddit client. It takes the configuration and the channel
@@ -42,10 +42,10 @@ func New(cfg *config.Config, m chan<- spotify.Music) (*Client, error) {
 		MusicChan:            m,
 		RetryAttemptWaitTime: time.Duration(cfg.Reddit.MaxRetryAttempts),
 		MaxRetryAttempts:     cfg.Reddit.MaxRetryAttempts,
-		Verbose:              cfg.Verbose,
+		Logger:               log.WithFields(log.Fields{"service": "reddit"}),
 	}
 
-	c.Log("client setup ok")
+	c.Logger.Infoln("client setup ok")
 
 	return &c, nil
 }
@@ -68,30 +68,30 @@ func (c *Client) PrepareScanner() error {
 // Listen starts listening for reddit posts. It also contains logic for
 // reconnecting if an error occurs.
 func (c *Client) Listen(shutdown chan<- os.Signal) {
-	c.Log(fmt.Sprintf("watching %d subreddits:", len(c.Config.Subreddits)))
+	c.Logger.Infof("watching %d subreddits:", len(c.Config.Subreddits))
 
 	for _, sub := range c.Config.Subreddits {
-		c.Log("\tr/" + sub)
+		c.Logger.Infoln("\tr/" + sub)
 	}
 
 	var retryAttempt int
 
 	for {
 		if retryAttempt == c.MaxRetryAttempts {
-			c.Log(fmt.Sprintf("hit maximum retry attempts %d - quitting", retryAttempt))
+			c.Logger.Errorf("hit maximum retry attempts %d - quitting", retryAttempt)
 			shutdown <- os.Interrupt
 		}
 
 		if err := c.Wait(); err != nil {
 			retryAttempt = 0
-			c.Log(fmt.Sprintf("reddit/graw error: %s", err.Error()))
+			c.Logger.Errorf("reddit/graw error: %s", err)
 		}
 
-		c.Log(fmt.Sprintf("restarting reddit worker in %s seconds", c.RetryAttemptWaitTime))
+		c.Logger.Infof("restarting reddit helper in %s seconds", c.RetryAttemptWaitTime)
 		time.Sleep(c.RetryAttemptWaitTime * time.Second)
 
 		if err := c.PrepareScanner(); err != nil {
-			c.Log(fmt.Sprintf("error restarting reddit worker: %s", err.Error()))
+			c.Logger.Errorf("error restarting reddit worker: %s", err)
 		}
 
 		retryAttempt++
@@ -100,14 +100,14 @@ func (c *Client) Listen(shutdown chan<- os.Signal) {
 
 // Close shuts down the reddit client.
 func (c *Client) Close() {
-	c.Log("shutting down")
+	c.Logger.Println("shutting down")
 	c.Stop()
 }
 
 // Post receives incoming posts from reddit and passes them
 // on to the spotify processor.
 func (c *Client) Post(post *reddit.Post) error {
-	c.Log(fmt.Sprintf("r/%s: %s (https://reddit.com%s)", post.Subreddit, post.Title, post.Permalink))
+	c.Logger.Infof("r/%s: %s (https://reddit.com%s)", post.Subreddit, post.Title, post.Permalink)
 	c.MusicChan <- spotify.Music{
 		Subreddit:        strings.ToLower(post.Subreddit),
 		PostTitle:        post.Title,
@@ -117,13 +117,6 @@ func (c *Client) Post(post *reddit.Post) error {
 	}
 
 	return nil
-}
-
-// Log logs.
-func (c *Client) Log(s string) {
-	if c.Verbose {
-		log.Printf("reddit:\t%s\n", s)
-	}
 }
 
 func cleanSubNames(subs []string) []string {
