@@ -33,7 +33,7 @@ func (c *Client) PreparePlaylists(cfg *config.Config) error {
 				return fmt.Errorf("error creating playlist: %w", err)
 			}
 
-			c.Log(fmt.Sprintf("created playlist: %s", p.Name))
+			c.Logger.Infof("created playlist: %s", p.Name)
 		}
 
 		// create subreddit playlist map
@@ -67,7 +67,7 @@ func (c *Client) getPlaylistByID(ID string) (*spotify.FullPlaylist, error) {
 		return nil, fmt.Errorf("getting playlist %s: %w", ID, err)
 	}
 
-	c.Log(fmt.Sprintf("found playlist: %s (%s)", playlist.Name, playlist.ID))
+	c.Logger.Infof("found playlist: %s (%s)", playlist.Name, playlist.ID)
 
 	return playlist, nil
 }
@@ -87,7 +87,7 @@ func (c *Client) getPlaylistByName(name string) (*spotify.FullPlaylist, error) {
 				return nil, fmt.Errorf("getting playlist %s (%s): %w", p.Name, p.ID, err)
 			}
 
-			c.Log(fmt.Sprintf("found playlist: %s (%s)", p.Name, p.ID))
+			c.Logger.Infof("found playlist: %s (%s)", p.Name, p.ID)
 
 			break
 		}
@@ -118,7 +118,7 @@ func (c *Client) addToPlaylist(subreddit string, trackID spotify.ID) error {
 		return fmt.Errorf("adding track: playlist %s, track %s: %w", playlistID, trackID, err)
 	}
 
-	c.Log(fmt.Sprintf("\tadded track to playlist %s, snapshot id: %s", playlistID, snapshotID))
+	c.Logger.Infof("\tadded track to playlist %s, snapshot id: %s", playlistID, snapshotID)
 
 	return nil
 }

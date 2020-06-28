@@ -5,20 +5,19 @@ package dissic
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/engvik/dissic/internal/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/turnage/graw/reddit"
 )
 
 type spotifyService interface {
 	Authenticate(openBrowser bool) error
 	Listen()
-	Log(s string)
 	Close()
 	PreparePlaylists(cfg *config.Config) error
 	AuthHandler() http.HandlerFunc
@@ -30,7 +29,6 @@ type redditService interface {
 	Listen(shutdown chan<- os.Signal)
 	Close()
 	Post(post *reddit.Post) error
-	Log(s string)
 }
 
 // Service is the dissic service. It holds the config and all other services.
@@ -59,35 +57,37 @@ func New(cfg *config.Config, s spotifyService, r redditService, mux *http.ServeM
 // Run starts the dissic service. It takes care of authentication, sets up
 // listeneres and are responisble for properly tearing everything down.
 func (s *Service) Run(ctx context.Context) {
+	log.WithFields(log.Fields{"service": "dissic"}).Infof("dissic %s", s.Config.Version)
+
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("error starting http server: %s", err.Error())
+			log.Fatalf("error starting http server: %s", err)
 		}
 	}(s.HTTP)
 
 	// Authenticate spotify
-	s.Spotify.Log("awaiting authentication...")
+	log.WithFields(log.Fields{"service": "spotify"}).Infoln("awaiting authentication...")
 	s.Spotify.Authenticate(s.Config.AuthOpenBrowser)
-	s.Spotify.Log("authenticated!")
+	log.WithFields(log.Fields{"service": "spotify"}).Infoln("authenticated!")
 
 	// HTTP server no longer needed
 	if err := s.HTTP.Shutdown(ctx); err != nil {
-		fmt.Printf("error shutting down http server: %s", err.Error())
+		fmt.Printf("error shutting down http server: %s", err)
 	}
 
 	// Get and set Spotify user
 	if err := s.Spotify.SetUser(); err != nil {
-		log.Fatalf("error setting user ID: %s", err.Error())
+		log.Fatalf("error setting user ID: %s", err)
 	}
 
 	// Get Spotify playlists
 	if err := s.Spotify.PreparePlaylists(s.Config); err != nil {
-		log.Fatalf("error preparing playlists: %s", err.Error())
+		log.Fatalf("error preparing playlists: %s", err)
 	}
 
 	// Prepare the reddit scanner
 	if err := s.Reddit.PrepareScanner(); err != nil {
-		log.Fatalf("error preparing reddit/graw scanner: %s", err.Error())
+		log.Fatalf("error preparing reddit/graw scanner: %s")
 	}
 
 	// Start listening and block until shutdown signal receieved
@@ -96,17 +96,15 @@ func (s *Service) Run(ctx context.Context) {
 		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 		go s.Spotify.Listen()
-		s.Spotify.Log("worker ready")
+		log.WithFields(log.Fields{"service": "spotify"}).Infoln("helper ready")
 		go s.Reddit.Listen(shutdown)
-		s.Reddit.Log("worker ready")
+		log.WithFields(log.Fields{"service": "reddit"}).Infoln("helper ready")
 
 		<-shutdown
 
 		s.Spotify.Close()
 		s.Reddit.Close()
 
-		if s.Config.Verbose {
-			log.Println("bye, bye!")
-		}
+		log.WithFields(log.Fields{"service": "dissic"}).Infoln("bye, bye!")
 	}(ctx, s)
 }

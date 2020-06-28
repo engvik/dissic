@@ -49,14 +49,14 @@ func (c *Client) getTrackByTitles(m Music) (spotify.FullTrack, error) {
 			// create search query
 			searchQuery, err := c.createSearchQuery(title, s)
 			if err != nil {
-				c.Log(fmt.Sprintf("\tsearch query: %s, separator: %s", err.Error(), s))
+				c.Logger.Infof("\tsearch query: %s, separator: %s", err, s)
 				continue
 			}
 
 			// search by query
 			res, err := c.Spotify.Search(searchQuery, spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 			if err != nil {
-				c.Log(fmt.Sprintf("search: %s", err.Error()))
+				c.Logger.Infof("search: %s", err)
 				continue
 			}
 
@@ -78,7 +78,7 @@ func (c *Client) findMatchFromSearchResult(title string, res *spotify.SearchResu
 		if strings.Contains(cmprTitle, strings.ToLower(t.Name)) {
 			for _, artist := range t.Artists {
 				if strings.Contains(cmprTitle, strings.ToLower(artist.Name)) {
-					c.Log(fmt.Sprintf("\ttrack found: %s (%s)", title, t.ID))
+					c.Logger.Infof("\ttrack found: %s (%s)", title, t.ID)
 					return t, true
 				}
 			}
@@ -104,6 +104,6 @@ func (c *Client) createSearchQuery(title string, separator string) (string, erro
 	searchQuery = strings.Join(splitTitle, " ")
 	searchQuery = strings.TrimSpace(searchQuery)
 
-	c.Log(fmt.Sprintf("\tsearch query: \"%s\" from title: %s", searchQuery, title))
+	c.Logger.Info("\tsearch query: \"%s\" from title: %s", searchQuery, title)
 	return searchQuery, nil
 }
