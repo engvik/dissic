@@ -32,7 +32,7 @@ playlists:
         name: "playlist-one"
         # subreddits to follow
         subreddits:
-            # with and withour r/ prefix is are supported 
+            # with and withour r/ prefix are supported 
             - Music 
     -
         # supports using spotify playlist id 
