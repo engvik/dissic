@@ -85,7 +85,7 @@ func (s *Service) Run(ctx context.Context) {
 
 	// Prepare the reddit scanner
 	if err := s.Reddit.PrepareScanner(); err != nil {
-		log.Fatalf("error preparing reddit/graw scanner: %s")
+		log.Fatalf("error preparing reddit/graw scanner: %s", err)
 	}
 
 	// Start listening and block until shutdown signal receieved

@@ -104,6 +104,6 @@ func (c *Client) createSearchQuery(title string, separator string) (string, erro
 	searchQuery = strings.Join(splitTitle, " ")
 	searchQuery = strings.TrimSpace(searchQuery)
 
-	c.Logger.Info("\tsearch query: \"%s\" from title: %s", searchQuery, title)
+	c.Logger.Infof("\tsearch query: \"%s\" from title: %s", searchQuery, title)
 	return searchQuery, nil
 }

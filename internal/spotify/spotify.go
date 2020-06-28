@@ -79,7 +79,7 @@ func (c *Client) handle(m Music) {
 	if m.URL != "" {
 		track, err := c.getTrackByURL(m.URL)
 		if err != nil {
-			c.Logger.Infof("\ttrack by url: %s")
+			c.Logger.Infof("\ttrack by url: %s", err)
 		}
 
 		if track != nil {
