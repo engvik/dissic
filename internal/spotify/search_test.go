@@ -1,8 +1,19 @@
 package spotify
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/engvik/dissic/internal/config"
+)
 
 func TestCreateSearchQuery(t *testing.T) {
+	var cfg config.Config
+
+	c, err := New(&cfg)
+	if err != nil {
+		t.Fatalf("error setting up test client: %s", err)
+	}
+
 	tests := []struct {
 		name      string
 		title     string
@@ -46,8 +57,6 @@ func TestCreateSearchQuery(t *testing.T) {
 			"Something Something",
 		},
 	}
-
-	var c Client
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
