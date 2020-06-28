@@ -24,6 +24,8 @@ func main() {
 		log.Fatalf("error parsing config: %s", err)
 	}
 
+	log.WithFields(log.Fields{"service": "dissic"}).Infof("dissic %s", cfg.Version)
+
 	// Set up spotify service
 	s, err := spotify.New(cfg)
 	if err != nil {

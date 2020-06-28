@@ -57,8 +57,6 @@ func New(cfg *config.Config, s spotifyService, r redditService, mux *http.ServeM
 // Run starts the dissic service. It takes care of authentication, sets up
 // listeneres and are responisble for properly tearing everything down.
 func (s *Service) Run(ctx context.Context) {
-	log.WithFields(log.Fields{"service": "dissic"}).Infof("dissic %s", s.Config.Version)
-
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("error starting http server: %s", err)
