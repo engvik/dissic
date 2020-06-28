@@ -4,9 +4,9 @@ package config
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"runtime"
 
 	"github.com/kelseyhightower/envconfig"
@@ -20,6 +20,7 @@ type environment struct {
 	RedditUsername      string `envconfig:"REDDIT_USERNAME"`
 	SpotifyClientID     string `envconfig:"SPOTIFY_CLIENT_ID"`
 	SpotifyClientSecret string `envconfig:"SPOTIFY_CLIENT_SECRET"`
+	ConfigFile          string `envconfig:"DISSIC_CONFIG"`
 }
 
 // Config holds the entire dissic config (config.yaml and env vars)
@@ -59,7 +60,20 @@ type Playlist struct {
 // Loads reads config from file and environment variables. It also adds
 // default values where applicable and validates the config before returning.
 func Load() (*Config, error) {
-	cf, err := readConfigFile()
+	var configFile string
+	flag.StringVar(&configFile, "config", "", "path to config file")
+	flag.Parse()
+
+	var env environment
+	if err := envconfig.Process("dissic", &env); err != nil {
+		return nil, fmt.Errorf("parsing environment variables: %w", err)
+	}
+
+	if configFile == "" {
+		configFile = env.ConfigFile
+	}
+
+	cf, err := readConfigFile(configFile)
 	if err != nil {
 		return nil, fmt.Errorf("reading config file: %w", err)
 	}
@@ -67,11 +81,6 @@ func Load() (*Config, error) {
 	var cfg Config
 	if err := yaml.Unmarshal(cf, &cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal yaml file: %w", err)
-	}
-
-	var env environment
-	if err := envconfig.Process("dissic", &env); err != nil {
-		return nil, fmt.Errorf("parsing environment variables: %w", err)
 	}
 
 	cfg.addEnvironment(env)
@@ -169,15 +178,10 @@ func (c *Config) setDefaultValues() {
 	}
 }
 
-func readConfigFile() ([]byte, error) {
-	path, err := os.Getwd()
+func readConfigFile(path string) ([]byte, error) {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("get working directory: %w", err)
-	}
-
-	data, err := ioutil.ReadFile(fmt.Sprintf("%s/config.yaml", path))
-	if err != nil {
-		return nil, fmt.Errorf("reading file: %w", err)
+		return nil, fmt.Errorf("reading config file: %s, %w", path, err)
 	}
 
 	return data, nil
