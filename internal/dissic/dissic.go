@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/engvik/dissic/pkg/config"
+	"github.com/engvik/dissic/internal/config"
 	"github.com/turnage/graw/reddit"
 )
 
