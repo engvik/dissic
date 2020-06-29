@@ -13,3 +13,11 @@ type Music struct {
 func (m *Music) titleStringSlice() []string {
 	return []string{m.PostTitle, m.MediaTitle, m.SecureMediaTitle}
 }
+
+func (m *Music) isEmpty() bool {
+	if m.Subreddit == "" {
+		return true
+	}
+
+	return false
+}
