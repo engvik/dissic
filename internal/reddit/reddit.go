@@ -89,16 +89,18 @@ func (c *Client) Listen(shutdown chan<- os.Signal) {
 			c.Logger.Errorf("reddit/graw error: %s", err)
 		}
 
-		if c.ShouldRetry {
-			c.Logger.Infof("restarting reddit helper in %s seconds", c.RetryAttemptWaitTime)
-			time.Sleep(c.RetryAttemptWaitTime * time.Second)
-
-			if err := c.PrepareScanner(); err != nil {
-				c.Logger.Errorf("error restarting reddit helper: %s", err)
-			}
-
-			retryAttempt++
+		if !c.ShouldRetry {
+			return
 		}
+
+		c.Logger.Infof("restarting reddit helper in %s seconds", c.RetryAttemptWaitTime)
+		time.Sleep(c.RetryAttemptWaitTime * time.Second)
+
+		if err := c.PrepareScanner(); err != nil {
+			c.Logger.Errorf("error restarting reddit helper: %s", err)
+		}
+
+		retryAttempt++
 	}
 }
 
