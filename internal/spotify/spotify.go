@@ -1,4 +1,4 @@
-// package spotify contains an implementaion of the spotify service.
+// Package spotify contains an implementaion of the spotify service.
 package spotify
 
 import (

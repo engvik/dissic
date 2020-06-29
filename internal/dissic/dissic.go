@@ -1,4 +1,4 @@
-// package dissic are responsible for setting up and starting dissic.
+// Package dissic are responsible for setting up and starting dissic.
 // It holds the services needed and sets up and tears down everything.
 package dissic
 
