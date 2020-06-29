@@ -17,17 +17,17 @@ func (c *Client) getTrackByURL(URL string) (*spotify.FullTrack, error) {
 	}
 
 	if parsedURL.Host != "open.spotify.com" {
-		return nil, errors.New(fmt.Sprintf("not a spotify url: %s", URL))
+		return nil, fmt.Errorf("not a spotify url: %s", URL)
 	}
 
 	splitURL := strings.Split(parsedURL.Path, "/")
 
 	if len(splitURL) != 3 {
-		return nil, errors.New(fmt.Sprintf("unexpected path length: %s", parsedURL.Path))
+		return nil, fmt.Errorf("unexpected path length: %s", parsedURL.Path)
 	}
 
 	if splitURL[1] != "track" {
-		return nil, errors.New(fmt.Sprintf("not a track path: %s", parsedURL.Path))
+		return nil, fmt.Errorf("not a track path: %s", parsedURL.Path)
 	}
 
 	return c.Spotify.GetTrack(spotify.ID(splitURL[2]))
@@ -98,7 +98,7 @@ func (c *Client) createSearchQuery(title string, separator string) (string, erro
 	splitTitle := strings.Split(searchQuery, fmt.Sprintf(" %s ", separator))
 
 	if len(splitTitle) <= 1 {
-		return "", errors.New(fmt.Sprintf("not able to find title and/or artist: %s", searchQuery))
+		return "", fmt.Errorf("not able to find title and/or artist: %s", searchQuery)
 	}
 
 	searchQuery = strings.Join(splitTitle, " ")
