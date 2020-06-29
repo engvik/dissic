@@ -21,6 +21,7 @@ type Client struct {
 	MusicChan            chan<- spotify.Music
 	RetryAttemptWaitTime time.Duration
 	MaxRetryAttempts     int
+	ShouldRetry          bool
 	Stop                 func()
 	Wait                 func() error
 	Logger               *log.Entry
@@ -42,6 +43,7 @@ func New(cfg *config.Config, m chan<- spotify.Music) (*Client, error) {
 		MusicChan:            m,
 		RetryAttemptWaitTime: time.Duration(cfg.Reddit.MaxRetryAttempts),
 		MaxRetryAttempts:     cfg.Reddit.MaxRetryAttempts,
+		ShouldRetry:          true,
 		Logger:               log.WithFields(log.Fields{"service": "reddit"}),
 	}
 
@@ -87,19 +89,22 @@ func (c *Client) Listen(shutdown chan<- os.Signal) {
 			c.Logger.Errorf("reddit/graw error: %s", err)
 		}
 
-		c.Logger.Infof("restarting reddit helper in %s seconds", c.RetryAttemptWaitTime)
-		time.Sleep(c.RetryAttemptWaitTime * time.Second)
+		if c.ShouldRetry {
+			c.Logger.Infof("restarting reddit helper in %s seconds", c.RetryAttemptWaitTime)
+			time.Sleep(c.RetryAttemptWaitTime * time.Second)
 
-		if err := c.PrepareScanner(); err != nil {
-			c.Logger.Errorf("error restarting reddit worker: %s", err)
+			if err := c.PrepareScanner(); err != nil {
+				c.Logger.Errorf("error restarting reddit helper: %s", err)
+			}
+
+			retryAttempt++
 		}
-
-		retryAttempt++
 	}
 }
 
 // Close shuts down the reddit client.
 func (c *Client) Close() {
+	c.ShouldRetry = false
 	c.Logger.Println("shutting down")
 	c.Stop()
 }
