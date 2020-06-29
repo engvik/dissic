@@ -1,4 +1,4 @@
-// package config contains the dissic config and methods to add
+// Package config contains the dissic config and methods to add
 // default values and validation.
 package config
 
@@ -57,7 +57,7 @@ type Playlist struct {
 	Subreddits []string `yaml:"subreddits"`
 }
 
-// Loads reads config from file and environment variables. It also adds
+// Load reads config from file and environment variables. It also adds
 // default values where applicable and validates the config before returning.
 func Load() (*Config, error) {
 	var configFile string
@@ -153,7 +153,7 @@ func (c *Config) validate() error {
 
 	for i, p := range c.Playlists {
 		if p.ID == "" && p.Name == "" {
-			return errors.New(fmt.Sprintf("playlist number %d is missing ID or name", i))
+			return fmt.Errorf("playlist number %d is missing ID or name", i)
 		}
 	}
 
