@@ -106,7 +106,7 @@ func (c *Client) handle(m Music) {
 	}
 }
 
-// Closes properly closes the Spotify client
+// Close properly closes the Spotify client
 func (c *Client) Close() {
 	c.Logger.Infoln("shutting down")
 	close(c.AuthChan)
