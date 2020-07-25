@@ -45,6 +45,6 @@ func main() {
 	// Set up dissic service
 	d := dissic.New(cfg, s, r, mux)
 
-	// Run dissic
-	d.Run(ctx)
+	// Start dissic service
+	d.Start(ctx)
 }

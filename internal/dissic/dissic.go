@@ -54,9 +54,9 @@ func New(cfg *config.Config, s spotifyService, r redditService, mux *http.ServeM
 	return d
 }
 
-// Run starts the dissic service. It takes care of authentication, sets up
+// Start starts the dissic service. It takes care of authentication, sets up
 // listeneres and are responisble for properly tearing everything down.
-func (s *Service) Run(ctx context.Context) {
+func (s *Service) Start(ctx context.Context) {
 	go func(s *http.Server) {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("error starting http server: %s", err)
