@@ -13,7 +13,7 @@
 ### Configure and run
 
 1) Download the [latest release](https://github.com/engvik/dissic/releases)
-2) Copy `config.yaml.example` and store it where you want
+2) Copy the content of `config.yaml.example` and store it where you want
 3) Login at [Spotify for Developers](ihttps://developer.spotify.com/my-applications/) and create a new app
 4) Open your config file
 5) Add your reddit username to the reddit section
