@@ -1,5 +1,5 @@
 # Verbose log output
-verbose: true
+verbose: false
 
 # HTTP port
 http-port: 8080
