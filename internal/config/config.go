@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const version = "0.0.1"
+const version = "1.0.0-beta.1"
 
 type environment struct {
 	RedditUsername      string `envconfig:"REDDIT_USERNAME"`
