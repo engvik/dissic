@@ -1,7 +1,8 @@
 # dissic
 
-**Dis**cover mu**sic** by automatically creating Spotify playlist from subreddits.
+![tests](https://github.com/engvik/dissic/workflows/test/badge.svg)
 
+**Dis**cover mu**sic** by automatically creating Spotify playlist from subreddits.
 
 ## Setup
 
