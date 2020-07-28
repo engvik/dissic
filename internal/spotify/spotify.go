@@ -70,7 +70,7 @@ func (c *Client) Listen() {
 	for {
 		select {
 		case m := <-c.MusicChan:
-			go c.handle(m)
+			c.handle(m)
 		}
 	}
 }
