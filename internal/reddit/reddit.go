@@ -4,6 +4,7 @@ package reddit
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -30,7 +31,8 @@ type Client struct {
 // New sets up a new reddit client. It takes the configuration and the channel
 // to publish new posts to for processing. Returns a client or an error.
 func New(cfg *config.Config, m chan<- spotify.Music) (*Client, error) {
-	s, err := reddit.NewScript(cfg.GetRedditUserAgent(), time.Duration(cfg.Reddit.RequestRate))
+	ua := getRedditUserAgent(cfg)
+	s, err := reddit.NewScript(ua, time.Duration(cfg.Reddit.RequestRate))
 	if err != nil {
 		return nil, fmt.Errorf("new script: %w", err)
 	}
@@ -134,4 +136,8 @@ func cleanSubNames(subs []string) []string {
 	}
 
 	return subs
+}
+
+func getRedditUserAgent(cfg *config.Config) string {
+	return fmt.Sprintf("%s:github.com/engvik/dissic:%s (by /u/%s)", runtime.GOOS, cfg.Version, cfg.Reddit.Username)
 }
