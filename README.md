@@ -1,6 +1,7 @@
 # dissic
 
 ![tests](https://github.com/engvik/dissic/workflows/test/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/engvik/dissic)](https://goreportcard.com/report/github.com/engvik/dissic)
 
 **Dis**cover mu**sic** by automatically creating Spotify playlist from subreddits.
 
