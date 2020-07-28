@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"runtime"
 
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
@@ -97,11 +96,6 @@ func Load() (*Config, error) {
 	}
 
 	return &cfg, nil
-}
-
-// GetRedditUserAgent creates a reddit user agent for graw
-func (c *Config) GetRedditUserAgent() string {
-	return fmt.Sprintf("%s:github.com/engvik/dissic:%s (by /u/%s)", runtime.GOOS, c.Version, c.Reddit.Username)
 }
 
 func (c *Config) getSubreddits() []string {
