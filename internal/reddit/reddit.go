@@ -1,4 +1,4 @@
-// Package reddit contains an implementaion of the reddit service.
+// Package reddit contains an implementation of the reddit service.
 package reddit
 
 import (

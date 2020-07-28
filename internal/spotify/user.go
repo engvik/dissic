@@ -12,7 +12,7 @@ func (c *Client) SetUser() error {
 		return fmt.Errorf("getting user: %w", err)
 	}
 
-	c.Logger.Infof("retrived user: %s", user.ID)
+	c.Logger.Infof("retrieved user: %s", user.ID)
 
 	c.User = user
 
