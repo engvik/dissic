@@ -65,7 +65,9 @@ func (s *Service) Start(ctx context.Context) {
 
 	// Authenticate spotify
 	log.WithFields(log.Fields{"service": "spotify"}).Infoln("awaiting authentication...")
-	s.Spotify.Authenticate(s.Config.AuthOpenBrowser)
+	if err := s.Spotify.Authenticate(s.Config.AuthOpenBrowser); err != nil {
+		log.Fatalf("error authenticating: %s", err)
+	}
 	log.WithFields(log.Fields{"service": "spotify"}).Infoln("authenticated!")
 
 	// HTTP server no longer needed
