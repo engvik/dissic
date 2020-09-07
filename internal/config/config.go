@@ -133,10 +133,6 @@ func (c *Config) validate() error {
 		return errors.New("reddit request rate must be 2 or higher")
 	}
 
-	if len(c.Reddit.Subreddits) <= 0 {
-		return errors.New("no subreddits passed")
-	}
-
 	if c.Spotify.ClientID == "" {
 		return errors.New("spotify client id is missing")
 	}
@@ -148,6 +144,10 @@ func (c *Config) validate() error {
 	for i, p := range c.Playlists {
 		if p.ID == "" && p.Name == "" {
 			return fmt.Errorf("playlist number %d is missing ID or name", i)
+		}
+
+		if len(p.Subreddits) <= 0 {
+			return fmt.Errorf("no subreddits passed to playlist number %d", i)
 		}
 	}
 
