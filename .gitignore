@@ -17,5 +17,4 @@
 
 config.yaml
 
-dissic_*
-
+dist/
