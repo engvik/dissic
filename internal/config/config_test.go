@@ -9,7 +9,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func getTestConfigPath() (string, error) {
+func getTestConfigPath(t *testing.T) (string, error) {
+	t.Helper()
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return "", err
@@ -25,8 +27,10 @@ func getTestConfigPath() (string, error) {
 	return path, nil
 }
 
-func readAndParseConfig() (*Config, error) {
-	path, err := getTestConfigPath()
+func readAndParseConfig(t *testing.T) (*Config, error) {
+	t.Helper()
+
+	path, err := getTestConfigPath(t)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +49,7 @@ func readAndParseConfig() (*Config, error) {
 }
 
 func TestGetSubreddits(t *testing.T) {
-	cfg, err := readAndParseConfig()
+	cfg, err := readAndParseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -67,7 +71,7 @@ func TestGetSubreddits(t *testing.T) {
 }
 
 func TestAddEnvironment(t *testing.T) {
-	cfg, err := readAndParseConfig()
+	cfg, err := readAndParseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -100,7 +104,7 @@ func TestAddEnvironment(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
-	cfg, err := readAndParseConfig()
+	cfg, err := readAndParseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -161,7 +165,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestSetDefaultValues(t *testing.T) {
-	cfg, err := readAndParseConfig()
+	cfg, err := readAndParseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -193,7 +197,7 @@ func TestSetDefaultValues(t *testing.T) {
 }
 
 func TestReadConfigFile(t *testing.T) {
-	path, err := getTestConfigPath()
+	path, err := getTestConfigPath(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
