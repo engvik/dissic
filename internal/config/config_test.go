@@ -2,46 +2,43 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"strings"
 	"testing"
 
 	"gopkg.in/yaml.v2"
 )
 
-func getTestConfigPath(t *testing.T) (string, error) {
+var testConfig = []byte(`
+# Verbose log output
+verbose: true
+
+# HTTP port
+http-port: 8080
+
+# auto open browser for auth
+auth-open-browser: true
+
+reddit:
+    username: "test"
+    request-rate: 5
+    max-retry-attempts: 10
+    retry-attempt-wait-time: 10
+  
+spotify:
+    client-id: "test1337"
+    client-secret: "1337test"
+
+playlists:
+    -
+        name: "dissic-test"
+        subreddits:
+            - music
+`)
+
+func parseConfig(t *testing.T) (*Config, error) {
 	t.Helper()
-
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	root := strings.SplitAfter(wd, "dissic/")
-
-	if len(root) == 0 {
-		return "", fmt.Errorf("couldn't find project root: %s", wd)
-	}
-
-	path := root[0] + "internal/config/config_test.yaml"
-	return path, nil
-}
-
-func readAndParseConfig(t *testing.T) (*Config, error) {
-	t.Helper()
-
-	path, err := getTestConfigPath(t)
-	if err != nil {
-		return nil, err
-	}
-
-	cf, err := readConfigFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("reading config file: %w", err)
-	}
 
 	var cfg Config
-	if err := yaml.Unmarshal(cf, &cfg); err != nil {
+	if err := yaml.Unmarshal(testConfig, &cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal yaml file: %w", err)
 	}
 
@@ -49,7 +46,7 @@ func readAndParseConfig(t *testing.T) (*Config, error) {
 }
 
 func TestGetSubreddits(t *testing.T) {
-	cfg, err := readAndParseConfig(t)
+	cfg, err := parseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -71,7 +68,7 @@ func TestGetSubreddits(t *testing.T) {
 }
 
 func TestAddEnvironment(t *testing.T) {
-	cfg, err := readAndParseConfig(t)
+	cfg, err := parseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -104,7 +101,7 @@ func TestAddEnvironment(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
-	cfg, err := readAndParseConfig(t)
+	cfg, err := parseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -165,7 +162,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestSetDefaultValues(t *testing.T) {
-	cfg, err := readAndParseConfig(t)
+	cfg, err := parseConfig(t)
 	if err != nil {
 		t.Fatalf("error setting up test: %v", err)
 	}
@@ -194,25 +191,4 @@ func TestSetDefaultValues(t *testing.T) {
 		}
 	})
 
-}
-
-func TestReadConfigFile(t *testing.T) {
-	path, err := getTestConfigPath(t)
-	if err != nil {
-		t.Fatalf("error setting up test: %v", err)
-	}
-
-	t.Run("should read test config from file", func(t *testing.T) {
-		cf, err := readConfigFile(path)
-		if err != nil {
-			t.Fatalf("error reading file: %v", err)
-		}
-
-		got := len(cf)
-		exp := 381
-
-		if got != exp {
-			t.Errorf("unexpected config file length: got %d, exp %d", got, exp)
-		}
-	})
 }
