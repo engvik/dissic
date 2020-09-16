@@ -67,11 +67,8 @@ func (c *Client) Authenticate(openBrowser bool) error {
 
 // Listen listens for incoming data on the music channel.
 func (c *Client) Listen() {
-	for {
-		select {
-		case m := <-c.MusicChan:
-			c.handle(m)
-		}
+	for m := range c.MusicChan {
+		c.handle(m)
 	}
 }
 
