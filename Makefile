@@ -25,7 +25,7 @@ build:
 .PHONY: run
 ## run: Run dissic (set CONFIG=path/to/config.yaml)
 run:
-	go run -race cmd/sbanken/main.go --config=$(SBANKEN_CONFIG)
+	go run -race cmd/dissic/main.go --config=$(CONFIG)
 
 .PHONY: test
 ## test: Run the tests
